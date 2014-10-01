@@ -1,60 +1,10 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+```html
 <html>
 <head>
 <title>visio2python - Draw your Program in Microsoft Visio</title>
 <meta name="keywords" content="visio2pyhon, microsoft visio, python, converter, automat, state machine, program, ">
 <meta name="description" content="visio2python - Draw your Program">
-<style>
-body {
-    margin: 0 auto;
-    padding: 0;
-}
-
-a:link, a:visited {
-    color: blue;
-    text-decoration: none; 
-}
-
-a:active {
-    color: red;
-}
-
-a:hover {
-    text-decoration: underline; 
-} 
-
-pre {
-    font-size: 12px;
-    background-color: #DFDFDF; 
-    padding: 12px;
-}
-
-h1, h2, h3, h4, h5, h6, h7 {
-    font-family: Georgia,Utopia,Charter,serif;
-}
-
-p {
-}
-
-img {
-    border: none;
-}
-
-#content {
-    /* border: 1px black solid; */
-    margin:             0 auto;
-    padding:            0;
-    text-align:         justify;
-    line-height:        1.7;
-    min-height:         500px;
-    width:              960px;
-    font-family:        Helvetica,Arial,sans-serif;
-    font-size:          18px;
-    text-decoration:    none;
-}
-</style>
 </head>
-
 <body>
 <div id="content">
 <table width=60% align=center><tr><td align=justify>
@@ -100,7 +50,7 @@ taken from the article above,
 I draw it using <a href="http://datahaven.net/visio2python/automats.vss">this Microsoft Visio stancil</a>.
 </p>
 
-<img src="automat1.png">
+<img src="raw/master/automat1.png">
 
 Here is:
 <ul>
@@ -114,7 +64,7 @@ Here is:
 Using <b>visio2python</b> I generate Python code for this drawing.
 </p>
 
-<img src="visio2python-screen1.png">
+<img src="raw/master/visio2python-screen1.png">
 
 <p>
 It was written in the file ./generated/Automat_1.py, here is the file contents:
@@ -347,7 +297,7 @@ In the class <b><code>automat.Automat</code></b> you can use a timer event and p
 Let's see another sample that simulates a traffic light. Here is a state machine:
 </p>
 
-<img src="automat2.png">
+<img src="raw/master/automat2.png">
 
 <p>
 And working code:
@@ -478,7 +428,7 @@ Just need to be sure you are using right colors for conditions, actions, events 
 Mine palette looks like this:
 </p>
 
-<div align=center><img src="color-palette.png"></div>
+<div align=center><img src="raw/master/color-palette.png"></div>
 
 <p>
 After you did generated the Python code for your future program you will need to modify it to make it working, 
@@ -505,3 +455,4 @@ Download <b>visio2python</b> distribution <a href="http://datahaven.net/visio2py
 </div>
 </body>
 </html>
+```

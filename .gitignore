@@ -1,5 +1,9 @@
-*.txt
+generated/*
+merged/*
+data.txt
+erasing.txt
+generate.txt
+merge.txt
+structure.txt 
 go.publish
 build.bat
-generated\*
-merged\*
