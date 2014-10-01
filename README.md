@@ -37,7 +37,7 @@ taken from the article above,
 I draw it using [this Microsoft Visio stancil](http://datahaven.net/visio2python/automats.vss).
  
 
-![img](raw/master/automat1.png)
+![img](http://gitlab.bitpie.net/devel/visio2python/raw/master/automat1.png)
 
 Here is:
  * three states: **BEFORE**, **INSIDE** and **AFTER**,
@@ -50,7 +50,7 @@ Here is:
 Using **visio2python** I generate Python code for this drawing.
  
 
-![img](raw/master/visio2python-screen1.png)
+![img](http://gitlab.bitpie.net/devel/visio2python/raw/master/visio2python-screen1.png)
 
  
 It was written in the file ./generated/Automat_1.py, here is the file contents:
@@ -118,7 +118,7 @@ This is an automatically generated code, a template to create a complete program
  
  
 Class **`Automat1`** is a sub class of base class 
-[**`automat.Automat`**](raw/master/automat.py) which runs the state machine.
+[**`automat.Automat`**](http://gitlab.bitpie.net/devel/visio2python/raw/master/automat.py) which runs the state machine.
  
 
  
@@ -212,7 +212,7 @@ You see how simple is to write conditions and actions methods. No chance to make
  
 
  
-Take the file [**automat.py**](raw/master/automat.py), 
+Take the file [**automat.py**](http://gitlab.bitpie.net/devel/visio2python/raw/master/automat.py), 
 place it in the same folder and run the code to test it.
  
 
@@ -281,7 +281,7 @@ In the class **`automat.Automat`** you can use a timer event and pass it into co
 Let's see another sample that simulates a traffic light. Here is a state machine:
  
 
-![img](raw/master/automat2.png)
+![img](http://gitlab.bitpie.net/devel/visio2python/raw/master/automat2.png)
 
  
 And working code:
@@ -414,7 +414,7 @@ Just need to be sure you are using right colors for conditions, actions, events 
 Mine palette looks like this:
  
 
-<div align=center>![img](raw/master/color-palette.png)</div>
+<div align=center>![img](http://gitlab.bitpie.net/devel/visio2python/raw/master/color-palette.png)</div>
 
  
 After you did generated the Python code for your future program you will need to modify it to make it working, 
