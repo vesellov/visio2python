@@ -1,0 +1,5 @@
+*.txt
+go.publish
+build.bat
+generated\*
+merged\*
