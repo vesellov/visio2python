@@ -118,7 +118,7 @@ This is an automatically generated code, a template to create a complete program
  
  
 Class **`Automat1`** is a sub class of base class 
-[**`automat.Automat`**](http://gitlab.bitpie.net/devel/visio2python/raw/master/automat.py) which runs the state machine.
+[automat.Automat](http://gitlab.bitpie.net/devel/visio2python/raw/master/automat.py) which runs the state machine.
  
 
  
