@@ -165,6 +165,26 @@ Begin VB.Form Form1
       TabIndex        =   12
       Top             =   0
       Width           =   4935
+      Begin VB.CommandButton Command8 
+         Appearance      =   0  'Flat
+         BackColor       =   &H80000014&
+         Caption         =   "Build index file"
+         BeginProperty Font 
+            Name            =   "Tahoma"
+            Size            =   12
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   735
+         Left            =   120
+         Style           =   1  'Graphical
+         TabIndex        =   18
+         Top             =   2040
+         Width           =   2295
+      End
       Begin VB.CommandButton Command7 
          Appearance      =   0  'Flat
          BackColor       =   &H80000014&
@@ -179,11 +199,11 @@ Begin VB.Form Form1
             Strikethrough   =   0   'False
          EndProperty
          Height          =   735
-         Left            =   120
+         Left            =   2520
          Style           =   1  'Graphical
          TabIndex        =   17
          Top             =   2040
-         Width           =   4695
+         Width           =   2295
       End
       Begin VB.TextBox Text1 
          BeginProperty Font 
@@ -482,9 +502,29 @@ Private Sub GetData(pageName As String)
         End If
 SKIP_PAGE_:
     Next pageVisio
-    List1.AddItem ("Done, number of pages is " & pageNumber)
+    List1.AddItem ("DONE, number of pages is " & pageNumber)
     List1.ListIndex = List1.ListCount - 1
     ' List1.Refresh
+End Sub
+
+
+Private Sub GetIndex()
+    Set pagesVisio = docVisio.Pages
+    Dim pageNumber As Integer
+    Dim arcs As Integer
+    Dim states As Integer
+    Dim labl As String
+    pageNumber = 0
+    For Each pageVisio In pagesVisio
+        arcs = 0
+        states = 0
+        labl = ""
+        outputFile.WriteLine ((pageNumber) & " " & pageVisio.Name)
+        List1.AddItem ("page " & pageNumber & " " & pageVisio.Name)
+        pageNumber = pageNumber + 1
+    Next pageVisio
+    List1.AddItem ("DONE, number of pages is " & pageNumber)
+    List1.ListIndex = List1.ListCount - 1
 End Sub
 
 
@@ -580,6 +620,47 @@ EXIT_:
 End Sub
 
 
+Sub BuildIndexWholeDocument()
+    Dim sArgs() As String
+    Dim iLoop As Integer
+    
+    outputFilename = "./index.txt"
+    
+    List1.AddItem ("Looking for Microsoft Visio")
+    List1.ListIndex = List1.ListCount - 1
+    Set appVisio = GetObject(, "visio.application")
+    If appVisio Is Nothing Then
+        Set appVisio = CreateObject("visio.application")
+        If appVisio Is Nothing Then
+            List1.AddItem ("Error Opening Visio!")
+            List1.ListIndex = List1.ListCount - 1
+            GoTo EXIT_
+        End If
+    End If
+      
+    Set docVisio = appVisio.ActiveDocument
+    If docVisio Is Nothing Then
+        List1.AddItem ("Please Open Microsoft Visio Document")
+        List1.ListIndex = List1.ListCount - 1
+        GoTo EXIT_
+    End If
+         
+    Set outputFile = FSO.CreateTextFile(outputFilename)
+        
+    List1.AddItem ("Scanning current Microsoft Visio document")
+    List1.ListIndex = List1.ListCount - 1
+    GetIndex
+    
+    outputFile.Close
+  
+    List1.AddItem ("File  " + outputFilename + " created")
+    List1.ListIndex = List1.ListCount - 1
+     
+EXIT_:
+
+End Sub
+
+
 Private Sub Command1_Click()
     On Error Resume Next
     Set appVisio = GetObject(, "visio.application")
@@ -592,7 +673,6 @@ End Sub
 
 Private Sub Command2_Click()
     On Error Resume Next
-    ' List1.Clear
     ScanCurrentDocument
 End Sub
 
@@ -659,11 +739,16 @@ End Sub
 Private Sub Command7_Click()
     Dim oShell As Object
     Dim cmd As String
-    cmd = "del " & Text1.Text & "\\*.py "
+    cmd = "del " & Replace(Text1.Text, "/", "\\") & "\\*.py "
     List1.AddItem ("Running command " & cmd)
     List1.ListIndex = List1.ListCount - 1
     Set oShell = CreateObject("Wscript.Shell")
-    oShell.Run "%COMSPEC% /c " & cmd & " > erasing.txt", 0, True
+    oShell.Run "%COMSPEC% /c " & cmd, 0, True
+End Sub
+
+Private Sub Command8_Click()
+    On Error Resume Next
+    BuildIndexWholeDocument
 End Sub
 
 Private Sub Form_Load()

@@ -232,12 +232,12 @@ def main():
                                             w = nw
                                         if re.match('^do\w+?\(\)$', w):
                                             actions.append(prefix + 'self.' + w.replace('()', '(arg)').strip())
-                                        elif re.match('^do\w+?\(MSG_.+?\)$', w):
+                                        elif re.match('^do\w+?\(.*?MSG_\d+?.*?\)$', w):
                                             def _repl(mo):
                                                 d[page]['messages'].append(mo.group(1))
                                                 d[page]['msgfunc'] = True
-                                                return "(self.msg('%s', arg))" % mo.group(1)
-                                            w = re.sub('\((MSG_.+?)\)', _repl, w.strip())
+                                                return "self.msg('%s', arg)" % mo.group(1)
+                                            w = re.sub('(MSG_\d+?)', _repl, w.strip())
                                             actions.append(prefix + 'self.' + w)
                                         elif re.match('^do\w+?\(.+?\)$', w):
                                             actions.append(prefix + 'self.' + w.strip())
@@ -490,19 +490,23 @@ def main():
                 head += "        '%s': (%s, [%s]),\n" % (timer, str(delay), ','.join(map(lambda x: "'%s'" % x, states)))
             head += '        }\n\n'
         if d[page]['msgfunc']:
-            src += '    MESSAGES = {\n'
-            for msg in sorted(d[page]['messages']):
-                src += "        '%s': '',\n" % msg 
-            src += '        }\n\n'
-            src += '    def msg(self, msgid, arg=None):\n'
-            src += "        return self.MESSAGES.get(msgid, '')\n\n"
+            head += '    MESSAGES = {\n'
+            for msg in sorted(set(d[page]['messages'])):
+                head += "        '%s': '',\n" % msg 
+            head += '        }\n\n'
+            head += '    def msg(self, msgid, arg=None):\n'
+            head += "        return self.MESSAGES.get(msgid, '')\n\n"
         head += '    def init(self):\n'
         head += '        """\n'
         head += '        Method to initialize additional variables and flags at creation of the state machine.\n'
         head += '        """\n\n'
-        head += '    def state_changed(self, oldstate, newstate):\n'
+        head += '    def state_changed(self, oldstate, newstate, event, arg):\n'
         head += '        """\n'
         head += '        Method to to catch the moment when automat\'s state were changed.\n'
+        head += '        """\n\n'
+        head += '    def state_not_changed(self, curstate, event, arg):\n'
+        head += '        """\n'
+        head += '        Method to to catch the moment when some event was fired but automat\'s state was not changed.\n'
         head += '        """\n\n'
         head += '    def A(self, event, arg):\n'
         head += '        """\n'
