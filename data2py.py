@@ -232,12 +232,12 @@ def main():
                                             w = nw
                                         if re.match('^do\w+?\(\)$', w):
                                             actions.append(prefix + 'self.' + w.replace('()', '(arg)').strip())
-                                        elif re.match('^do\w+?\(.*?MSG_\d+?.*?\)$', w):
+                                        elif re.match('^do\w+?\(.*?MSG_\d+.*?\)$', w):
                                             def _repl(mo):
                                                 d[page]['messages'].append(mo.group(1))
                                                 d[page]['msgfunc'] = True
                                                 return "self.msg('%s', arg)" % mo.group(1)
-                                            w = re.sub('(MSG_\d+?)', _repl, w.strip())
+                                            w = re.sub('(MSG_\d+)', _repl, w.strip())
                                             actions.append(prefix + 'self.' + w)
                                         elif re.match('^do\w+?\(.+?\)$', w):
                                             actions.append(prefix + 'self.' + w.strip())
@@ -439,12 +439,12 @@ def main():
             for error in d[page]['errors']:
                 head += '    * %s\n' % error
                 print '    ERROR:', error
-        head += '"""\n\n'
-        head += 'import automat\n\n'
-        head += '_%s = None\n\n' % classname
+        head += '"""\n\n\n'
+        head += 'import automat\n\n\n'
+        head += '_%s = None\n\n\n' % classname
         head += 'def A(event=None, arg=None):\n'
         head += '    """\n'
-        head += '    Access method to interact with the state machine.\n'
+        head += '    Access method to interact with %s machine.\n' % automatname
         head += '    """\n'
         head += '    global _%s\n' % classname
         head += '    if _%s is None:\n' % classname
@@ -456,6 +456,16 @@ def main():
         head += '    if event is not None:\n'
         head += '        _%s.automat(event, arg)\n' % classname
         head += '    return _%s\n\n\n' % classname
+        head += 'def Destroy():\n'
+        head += '    """\n'
+        head += '    Destroy %s automat and remove its instance from memory.\n' % automatname 
+        head += '    """\n'
+        head += '    global _%s\n' % classname
+        head += '    if _%s is None:\n' % classname
+        head += '        return\n'
+        head += '    _%s.destroy()\n' % classname
+        head += '    del _%s\n' % classname
+        head += '    _%s = None\n\n\n' % classname
         head += 'class %s(automat.Automat):\n' % classname
         head += '    """\n'
         head += '    This class implements all the functionality of the ``%s()`` state machine.\n' % automatname.replace('(', '').replace(')', '')
@@ -498,15 +508,17 @@ def main():
             head += "        return self.MESSAGES.get(msgid, '')\n\n"
         head += '    def init(self):\n'
         head += '        """\n'
-        head += '        Method to initialize additional variables and flags at creation of the state machine.\n'
+        head += '        Method to initialize additional variables and flags\n' 
+        head += '        at creation phase of %s machine.\n' % automatname
         head += '        """\n\n'
         head += '    def state_changed(self, oldstate, newstate, event, arg):\n'
         head += '        """\n'
-        head += '        Method to to catch the moment when automat\'s state were changed.\n'
+        head += '        Method to catch the moment when %s state were changed.\n' % automatname
         head += '        """\n\n'
         head += '    def state_not_changed(self, curstate, event, arg):\n'
         head += '        """\n'
-        head += '        Method to to catch the moment when some event was fired but automat\'s state was not changed.\n'
+        head += '        This method intended to catch the moment when some event was fired in the %s\n' % automatname
+        head += '        but its state was not changed.\n'
         head += '        """\n\n'
         head += '    def A(self, event, arg):\n'
         head += '        """\n'
@@ -515,12 +527,13 @@ def main():
 
         #---tail
         tail = ''
-        tail += '\n\ndef main():\n'
-        tail += '    from twisted.internet import reactor\n'
-        tail += "    reactor.callWhenRunning(A, 'init')\n"
-        tail += '    reactor.run()\n\n'
-        tail += 'if __name__ == "__main__":\n'
-        tail += '    main()\n\n'
+        if 'init' in d[page]['events']:
+            tail += '\n\ndef main():\n'
+            tail += '    from twisted.internet import reactor\n'
+            tail += "    reactor.callWhenRunning(A, 'init')\n"
+            tail += '    reactor.run()\n\n'
+            tail += 'if __name__ == "__main__":\n'
+            tail += '    main()\n\n'
 
         #---modes
         if 'post' in modes and 'fast' in modes:

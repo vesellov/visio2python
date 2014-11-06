@@ -2,12 +2,14 @@ VERSION 5.00
 Begin VB.Form Form1 
    BackColor       =   &H80000001&
    BorderStyle     =   1  'Fixed Single
-   Caption         =   "visio2python"
-   ClientHeight    =   8505
-   ClientLeft      =   45
-   ClientTop       =   435
-   ClientWidth     =   15255
-   FillStyle       =   2  'Horizontal Line
+   Caption         =   $"Form1.frx":0000
+   ClientHeight    =   8880
+   ClientLeft      =   0
+   ClientTop       =   0
+   ClientWidth     =   15345
+   DrawStyle       =   -9510  'Solid
+   DrawWidth       =   10
+   FillStyle       =   9  'Solid
    BeginProperty Font 
       Name            =   "Arial"
       Size            =   8.25
@@ -17,336 +19,12 @@ Begin VB.Form Form1
       Italic          =   0   'False
       Strikethrough   =   0   'False
    EndProperty
-   Icon            =   "Form1.frx":0000
+   Icon            =   "Form1.frx":0009
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   8505
-   ScaleWidth      =   15255
-   Begin VB.ListBox List1 
-      Appearance      =   0  'Flat
-      BeginProperty Font 
-         Name            =   "Courier New"
-         Size            =   12
-         Charset         =   204
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   5430
-      Left            =   120
-      TabIndex        =   10
-      Top             =   3000
-      Width           =   15015
-   End
-   Begin VB.Frame Frame4 
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000001&
-      Caption         =   "Step 3"
-      BeginProperty Font 
-         Name            =   "Arial"
-         Size            =   9.75
-         Charset         =   204
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      ForeColor       =   &H8000000E&
-      Height          =   2895
-      Left            =   10200
-      TabIndex        =   13
-      Top             =   0
-      Width           =   4935
-      Begin VB.CommandButton Command6 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Add"
-         Height          =   340
-         Left            =   4200
-         Style           =   1  'Graphical
-         TabIndex        =   16
-         Top             =   1560
-         Width           =   615
-      End
-      Begin VB.ComboBox Combo1 
-         Height          =   330
-         ItemData        =   "Form1.frx":33E2
-         Left            =   120
-         List            =   "Form1.frx":33E4
-         TabIndex        =   15
-         Text            =   "Combo1"
-         Top             =   1560
-         Width           =   3975
-      End
-      Begin VB.CheckBox Check3 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
-         Caption         =   "don't modify any files, jsut show difference"
-         ForeColor       =   &H8000000E&
-         Height          =   255
-         Left            =   120
-         TabIndex        =   9
-         Top             =   2520
-         Width           =   4215
-      End
-      Begin VB.CheckBox Check2 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
-         Caption         =   "remove generated files after merge with existing code"
-         ForeColor       =   &H8000000E&
-         Height          =   255
-         Left            =   120
-         TabIndex        =   8
-         Top             =   2280
-         Width           =   4215
-      End
-      Begin VB.CheckBox Check1 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
-         Caption         =   "update existing files only, don't create new files"
-         ForeColor       =   &H8000000E&
-         Height          =   255
-         Left            =   120
-         TabIndex        =   7
-         Top             =   2040
-         Value           =   1  'Checked
-         Width           =   4095
-      End
-      Begin VB.CommandButton Command4 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Merge with existing files"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   0
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   855
-         Left            =   120
-         Style           =   1  'Graphical
-         TabIndex        =   6
-         Top             =   360
-         Width           =   4695
-      End
-      Begin VB.Label Label1 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
-         Caption         =   "Existing python files location:"
-         ForeColor       =   &H8000000E&
-         Height          =   255
-         Left            =   240
-         TabIndex        =   0
-         Top             =   1320
-         Width           =   4095
-      End
-   End
-   Begin VB.Frame Frame3 
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000001&
-      Caption         =   "Step 2"
-      BeginProperty Font 
-         Name            =   "Arial"
-         Size            =   9.75
-         Charset         =   204
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      ForeColor       =   &H8000000E&
-      Height          =   2895
-      Left            =   5160
-      TabIndex        =   12
-      Top             =   0
-      Width           =   4935
-      Begin VB.CommandButton Command8 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Build index file"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   0
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   735
-         Left            =   120
-         Style           =   1  'Graphical
-         TabIndex        =   18
-         Top             =   2040
-         Width           =   2295
-      End
-      Begin VB.CommandButton Command7 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Remove all generated files"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   0
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   735
-         Left            =   2520
-         Style           =   1  'Graphical
-         TabIndex        =   17
-         Top             =   2040
-         Width           =   2295
-      End
-      Begin VB.TextBox Text1 
-         BeginProperty Font 
-            Name            =   "Arial"
-            Size            =   8.25
-            Charset         =   204
-            Weight          =   400
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   285
-         Left            =   120
-         TabIndex        =   5
-         Text            =   "Text1"
-         Top             =   1560
-         Width           =   4695
-      End
-      Begin VB.CommandButton Command3 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Generate Python Code"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   204
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   855
-         Left            =   120
-         Style           =   1  'Graphical
-         TabIndex        =   4
-         Top             =   360
-         Width           =   4695
-      End
-      Begin VB.Label Label2 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
-         Caption         =   "Location for generated files:"
-         BeginProperty Font 
-            Name            =   "Arial"
-            Size            =   8.25
-            Charset         =   204
-            Weight          =   400
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         ForeColor       =   &H8000000E&
-         Height          =   255
-         Left            =   120
-         TabIndex        =   14
-         Top             =   1320
-         Width           =   4095
-      End
-   End
-   Begin VB.Frame Frame2 
-      Appearance      =   0  'Flat
-      BackColor       =   &H80000001&
-      Caption         =   "Step 1"
-      BeginProperty Font 
-         Name            =   "Arial"
-         Size            =   9.75
-         Charset         =   204
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      ForeColor       =   &H8000000E&
-      Height          =   2895
-      Left            =   120
-      TabIndex        =   11
-      Top             =   0
-      Width           =   4935
-      Begin VB.CommandButton Command5 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Scan current page only"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   204
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   735
-         Left            =   120
-         MaskColor       =   &H00FFFFFF&
-         Style           =   1  'Graphical
-         TabIndex        =   3
-         Top             =   2040
-         Width           =   4695
-      End
-      Begin VB.CommandButton Command1 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Run Microsoft Visio"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   204
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   735
-         Left            =   120
-         MaskColor       =   &H8000000E&
-         Style           =   1  'Graphical
-         TabIndex        =   1
-         Top             =   360
-         UseMaskColor    =   -1  'True
-         Width           =   4695
-      End
-      Begin VB.CommandButton Command2 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Scan opened MS Visio document"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   204
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   735
-         Left            =   120
-         MaskColor       =   &H00FFFFFF&
-         Style           =   1  'Graphical
-         TabIndex        =   2
-         Top             =   1200
-         Width           =   4695
-      End
-   End
+   ScaleHeight     =   8880
+   ScaleWidth      =   15345
 End
 Attribute VB_Name = "Form1"
 Attribute VB_GlobalNameSpace = False
@@ -671,6 +349,7 @@ End Sub
 
 
 
+
 Private Sub Command2_Click()
     On Error Resume Next
     ScanCurrentDocument
@@ -751,6 +430,8 @@ Private Sub Command8_Click()
     BuildIndexWholeDocument
 End Sub
 
+
+
 Private Sub Form_Load()
     Set FSO = CreateObject("Scripting.FileSystemObject")
     Dim i As Integer
@@ -802,3 +483,68 @@ Private Sub Form_Unload(Cancel As Integer)
     Set appVisio = Nothing
 End Sub
 
+
+
+
+Private Sub Command9_Click()
+    On Error Resume Next
+
+    List1.AddItem ("Looking for Microsoft Visio")
+    List1.ListIndex = List1.ListCount - 1
+    
+    Set appVisio = GetObject(, "visio.application")
+    If appVisio Is Nothing Then
+        Set appVisio = CreateObject("visio.application")
+        If appVisio Is Nothing Then
+            List1.AddItem ("Error Opening Visio!")
+            List1.ListIndex = List1.ListCount - 1
+            ' List1.Refresh
+            GoTo EXIT_
+        End If
+    End If
+      
+    Set docVisio = appVisio.ActiveDocument
+    If docVisio Is Nothing Then
+        List1.AddItem ("Please Open Microsoft Visio Document")
+        List1.ListIndex = List1.ListCount - 1
+        ' List1.Refresh
+        GoTo EXIT_
+    End If
+    
+    docVisio.PrintOut visPrintCurrentPage
+    
+EXIT_:
+
+End Sub
+
+
+Private Sub Command10_Click()
+    On Error Resume Next
+
+    List1.AddItem ("Looking for Microsoft Visio")
+    List1.ListIndex = List1.ListCount - 1
+    
+    Set appVisio = GetObject(, "visio.application")
+    If appVisio Is Nothing Then
+        Set appVisio = CreateObject("visio.application")
+        If appVisio Is Nothing Then
+            List1.AddItem ("Error Opening Visio!")
+            List1.ListIndex = List1.ListCount - 1
+            ' List1.Refresh
+            GoTo EXIT_
+        End If
+    End If
+      
+    Set docVisio = appVisio.ActiveDocument
+    If docVisio Is Nothing Then
+        List1.AddItem ("Please Open Microsoft Visio Document")
+        List1.ListIndex = List1.ListCount - 1
+        ' List1.Refresh
+        GoTo EXIT_
+    End If
+    
+    docVisio.PrintOut visPrintAll
+    
+EXIT_:
+
+End Sub

@@ -116,8 +116,8 @@ def mergeStateMachine(old, new, name):
                 if found_flag_post and 'post' not in flags: 
                     flags.append('post')
 
-        elif line.count('fast') and line.count('=') and (line.count('True') or line.count('False')) and found_class:
-            found_flag_fast = 'True' if line.count('True') else 'False'
+        # elif line.count('fast') and line.count('=') and (line.count('True') or line.count('False')) and found_class:
+        #     found_flag_fast = 'True' if line.count('True') else 'False'
 
         elif line.count('def A(self, event, arg):') and found_class:
             found_def_A = True
@@ -329,6 +329,10 @@ def mergeMethods(old, new, name):
         paragraph = len(line) - len(line.lstrip(' '))
         if line.strip():
             last_not_empty_line_index = line_index
+            if found_class and paragraph <= paragraph_class and class_finished_line_index == -1:
+                class_finished_line_index = line_index - 1
+                if non_automat_method_line_index == -1:
+                    non_automat_method_line_index = class_finished_line_index 
 
         if line.count('class ') and ( line.count('Automat') or line.count('automat.Automat')):
             found_class = re.search('class (\w+?)\(.*Automat.*\):', line)
@@ -348,12 +352,15 @@ def mergeMethods(old, new, name):
             start_line = line_index
 
         else:
-            if paragraph == paragraph_class and line.strip() != '' and end_line > 0 and class_finished_line_index == -1:
-                class_finished_line_index = line_index - 1
-            if paragraph == paragraph_def_A and found_def_A:
+            if paragraph <= paragraph_def_A and found_def_A:
                 found_def_A = False
                 end_line = line_index - 1
-
+                # print 'end_line', end_line
+                # class_finished_line_index = line_index - 1
+            if paragraph <= paragraph_class and line.strip() != '' and end_line > 0 and class_finished_line_index == -1:
+                class_finished_line_index = line_index - 1
+                # print 'class_finished_line_index', class_finished_line_index
+                
     if class_finished_line_index == -1 and end_line > 0:
         class_finished_line_index = last_not_empty_line_index + 1 
 
@@ -435,6 +442,8 @@ def mergeMethods(old, new, name):
             continue
         
         merged += ' ' * paragraph + 'def ' + method_name + '(' + ', '.join(params) + '):\n'
+
+    # print 'non_automat_method_line_index', non_automat_method_line_index 
 
     if non_automat_method_line_index == -1:
         non_automat_method_line_index = class_finished_line_index
