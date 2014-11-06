@@ -4,7 +4,7 @@ visio2python - Draw your Program in Microsoft Visio
 I would like here to tell you about another way to write programs.
 Certainly nothing fundamentally new in science, I will not open.
 But I created a utility called **visio2python** that really helps me during development of 
-http://datahaven.net project, so it might be usefull for other developers.
+http://datahaven.net and http://bitpie.net projects, so it might be usefull for other developers.
 
 The tool **visio2python** generates [Python](http://python.org) code from graphical diagrams created in 
 [Microsoft Visio](http://en.wikipedia.org/wiki/Microsoft_Visio). 
@@ -34,7 +34,7 @@ and of ["Save the best in the universities of Russia"](http://www.savethebest.ru
 Let's see how it looks on the picture. On the picture below you see a transition graph of state machine for  
 [this sample program](http://en.wikipedia.org/wiki/Automata-Based_Programming#Example) 
 taken from the article above,
-I draw it using [this Microsoft Visio stancil](http://datahaven.net/visio2python/automats.vss).
+I draw it using [this Microsoft Visio stancil](http://bitpie.net/visio2python/automats.vss).
  
 
 ![img](http://gitlab.bitpie.net/devel/visio2python/raw/master/automat1.png)
@@ -232,8 +232,6 @@ LONG_line_with_no_spaces
  
 You see the program works fine, it prints the first word from the input line and skip leading spaces.<br>
 I know, this is very simple example but I just want to show you how to use **visio2python** here.
-More complex examples you can found on the 
-[DataHaven.NET web site](http://datahaven.net/automats.html).
  
 
  
