@@ -77,6 +77,7 @@ def mergeStateMachine(old, new, name):
     found_def_A = False
     paragraph_def_A = -1
     found_state = ''
+    first_state_line = -1
     found_newstate = False
     found_return_newstate = False
     found_flag_post = ''
@@ -154,6 +155,11 @@ def mergeStateMachine(old, new, name):
                 else:
                     found_state = ''
                 found_condition = ''
+                if first_state_line == -1:
+                    first_state_line = line_index - 1
+                    if lines[first_state_line-1].strip().startswith('#---'):
+                        if lines[first_state_line-1].strip().endswith('---'):
+                            first_state_line -= 1
 
         elif ( line.count(' if ') or line.count(' elif ') ) and line.count(':') and found_state:
             if found_condition and found_state:
@@ -282,7 +288,7 @@ def mergeStateMachine(old, new, name):
         if not has_actions:
             merged += "            pass\n"
     
-    if 'post' in flags:
+    if 'post' in flags and not found_newstate:
         # if not found_newstate: 
             merged = '        newstate = self.state\n' + merged
     
@@ -291,9 +297,9 @@ def mergeStateMachine(old, new, name):
     else:
         merged += '        return None\n'
     
-    if start_line >= 0 and end_line >= 0:
+    if first_state_line >= 0 and end_line >= 0:
         src = ''
-        src += '\n'.join(lines[:start_line])
+        src += '\n'.join(lines[:first_state_line])
         src += '\n' + merged + '\n'
         src += '\n'.join(lines[end_line-1:])
         src += '\n'
