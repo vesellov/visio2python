@@ -23,7 +23,7 @@ Begin VB.Form Form1
    MinButton       =   0   'False
    ScaleHeight     =   8505
    ScaleWidth      =   15255
-   Begin VB.ListBox List1 
+   Begin VB.ListBox Output 
       Appearance      =   0  'Flat
       BeginProperty Font 
          Name            =   "Courier New"
@@ -283,9 +283,22 @@ Begin VB.Form Form1
       Top             =   0
       Width           =   4935
       Begin VB.CommandButton Command9 
-         Caption         =   "Command9"
-         Height          =   1455
+         Appearance      =   0  'Flat
+         BackColor       =   &H80000014&
+         Caption         =   "Scan and Fix All Shapes"
+         BeginProperty Font 
+            Name            =   "Tahoma"
+            Size            =   12
+            Charset         =   0
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   1575
          Left            =   120
+         MaskColor       =   &H00FFFFFF&
+         Style           =   1  'Graphical
          TabIndex        =   19
          Top             =   1200
          Width           =   2295
@@ -375,6 +388,8 @@ Dim shapeCur As Visio.Shape
 Dim charactersVisio As Visio.Characters
 Dim cellColorVisio As Visio.Cell
 Dim cellStyleVisio As Visio.Cell
+Dim chars As Visio.Characters
+Dim celll As Visio.Cell
 Dim connects As Visio.connects
 Dim connect As Visio.connect
 
@@ -404,55 +419,89 @@ Private Function CharacterFormatEnd(visShape As Visio.Shape, iBegin As Integer) 
 End Function
 
 
-
-
 Private Sub FixData()
     Set pagesVisio = docVisio.Pages
     Dim pageNumber As Integer
+    Dim Count As Integer
+    Dim diff As Integer
     Dim arcs As Integer
     Dim states As Integer
     Dim labl As String
     pageNumber = 0
+    Count = 0
+    diff = 0
     For Each pageVisio In pagesVisio
         For Each shapeVisio In pageVisio.Shapes
-            Set charactersVisio = shapeVisio.Characters
             If InStr(1, shapeVisio.Name, "arrow") > 0 Then
-                Dim iBegin As Integer
-                Dim iEnd As Integer
-                Dim iRow As Integer
-                Dim sColor As String
-                Dim tmpTxt As String
-                tmpTxt = ""
-                iBegin = 0
-                For iRow = 0 To shapeVisio.RowCount(visSectionCharacter)
-                    iEnd = CharacterFormatEnd(shapeVisio, iBegin)
-                    charactersVisio.Begin = iBegin
-                    charactersVisio.End = iEnd
-                    Set cellColorVisio = shapeVisio.CellsSRC(visSectionCharacter, iRow, visCharacterColor)
-                    If InStr(cellColorVisio.Formula, "9") > 0 Then
-                        charactersVisio.CharProps(visCharacterColor) = 3
-                    ElseIf InStr(charactersVisio.Formula, "0;128;0") > 0 Then
-                        charactersVisio.CharProps(visCharacterColor) = 3
-                    ElseIf InStr(charactersVisio.Formula, "255;0;0") > 0 Then
-                        charactersVisio.CharProps(visCharacterColor) = 2
-                    ElseIf InStr(charactersVisio.Formula, "0;0;255") > 0 Then
-                        charactersVisio.CharProps(visCharacterColor) = 7
-                    ElseIf InStr(charactersVisio.Formula, "128;128;0") > 0 Then
-                        charactersVisio.CharProps(visCharacterColor) = 5
-                    ElseIf InStr(charactersVisio.Formula, "0;0;0") > 0 Then
-                        charactersVisio.CharProps(visCharacterColor) = 14
+                Count = Count + 1
+                Dim i As Integer
+                For i = 0 To Len(shapeVisio.Text) - 1
+                    Set chars = shapeVisio.Characters
+                    chars.Begin = i
+                    chars.End = i + 1
+                    Set celll = shapeVisio.CellsSRC(visSectionCharacter, i, visCharacterColor)
+                    If InStr(celll.Formula, "9") > 0 Then
+                        chars.CharProps(visCharacterColor) = 3
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "0;128;0") > 0 Then
+                        chars.CharProps(visCharacterColor) = 3
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "0,128,0") > 0 Then
+                        chars.CharProps(visCharacterColor) = 3
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "255;0;0") > 0 Then
+                        chars.CharProps(visCharacterColor) = 2
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "255,0,0") > 0 Then
+                        chars.CharProps(visCharacterColor) = 2
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "0;0;255") > 0 Then
+                        chars.CharProps(visCharacterColor) = 7
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "0,0,255") > 0 Then
+                        chars.CharProps(visCharacterColor) = 7
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "0;255;255") > 0 Then
+                        chars.CharProps(visCharacterColor) = 7
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "0,255,255") > 0 Then
+                        chars.CharProps(visCharacterColor) = 7
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "128;128;0") > 0 Then
+                        chars.CharProps(visCharacterColor) = 5
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "128,128,0") > 0 Then
+                        chars.CharProps(visCharacterColor) = 5
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "0;0;0") > 0 Then
+                        chars.CharProps(visCharacterColor) = 14
+                        diff = diff + 1
+                    ElseIf InStr(celll.Formula, "0,0,0") > 0 Then
+                        chars.CharProps(visCharacterColor) = 14
+                        diff = diff + 1
                     End If
-                    iBegin = iEnd
-                    outputFile.WriteLine (shapeVisio.Name + ":" + Str(iRow) + ":" + cellColorVisio.Formula + ":" + charactersVisio.Text)
-                Next iRow
-                shapeVisio.CellsU("LineColor").Formula = 19
+                Next i
+                If shapeVisio.CellsU("LineColor").Formula <> 19 Then
+                    shapeVisio.CellsU("LineColor").Formula = 19
+                    diff = diff + 1
+                End If
             ElseIf InStr(1, shapeVisio.Name, "state") > 0 Then
-                shapeVisio.CellsU("LineColor").Formula = 19
+                Count = Count + 1
+                If shapeVisio.CellsU("LineColor").Formula <> 19 Then
+                    shapeVisio.CellsU("LineColor").Formula = 19
+                    diff = diff + 1
+                End If
             ElseIf InStr(1, shapeVisio.Name, "label") > 0 Then
-                shapeVisio.CellsU("LineColor").Formula = 19
+                Count = Count + 1
+                If shapeVisio.CellsU("LineColor").Formula <> 19 Then
+                    shapeVisio.CellsU("LineColor").Formula = 19
+                    diff = diff + 1
+                End If
             End If
         Next shapeVisio
     Next pageVisio
+    Output.AddItem ("Total " + Str(Count) + " shapes scanned, made " + Str(diff) + " changes")
+    Output.ListIndex = Output.ListCount - 1
 End Sub
 
 
@@ -477,15 +526,15 @@ Private Sub GetData(pageName As String)
             GoTo SKIP_PAGE_
         End If
         outputFile.WriteLine (Chr(10) & "page " & pageVisio.Name)
-        List1.AddItem ("page " & pageVisio.Name)
+        Output.AddItem ("page " & pageVisio.Name)
         pageNumber = pageNumber + 1
         Set shapesVisio = pageVisio.Shapes
         For Each shapeVisio In shapesVisio
             Set charactersVisio = shapeVisio.Characters
             If InStr(1, shapeVisio.Name, "state") > 0 Then
                 outputFile.WriteLine ("    state " & UCase(charactersVisio.Text))
-                List1.AddItem ("    state " & UCase(charactersVisio.Text))
-                List1.ListIndex = List1.ListCount - 1
+                Output.AddItem ("    state " & UCase(charactersVisio.Text))
+                Output.ListIndex = Output.ListCount - 1
                 states = states + 1
             ElseIf InStr(1, shapeVisio.Name, "arrow") > 0 Then
                 If shapeVisio.connects.Count > 1 Then
@@ -520,55 +569,55 @@ Private Sub GetData(pageName As String)
                             sColor = Replace(sColor, "RGB(", "[")
                             If sColor <> "[0;0;0]" And sColor <> "[255;0;0]" And sColor <> "[0;128;0]" And sColor <> "[0;0;255]" And sColor <> "[128;128;0]" Then
                                 outputFile.WriteLine ("        ERROR! text on link [" & shapeVisio.Name & "] have wrong color: " & sColor)
-                                List1.AddItem ("ERROR! text on link [" & shapeVisio.Name & "] have wrong color: " & sColor)
-                                List1.ListIndex = List1.ListCount - 1
+                                Output.AddItem ("ERROR! text on link [" & shapeVisio.Name & "] have wrong color: " & sColor)
+                                Output.ListIndex = Output.ListCount - 1
                             End If
                             tmpTxt = tmpTxt & "        " & "{" & sColor & "#" & cellStyleVisio & "#" & Replace(charactersVisio.Text, Chr(10), "\n") & "} " & Chr(10)
                             iBegin = iEnd
                         Next
                         outputFile.WriteLine (tmpTxt)
-                        List1.AddItem ("    link " & Replace(shapeVisio.Name, " ", "_") & " [" & UCase(shapeFrom.Characters.Text) & "] -> [" & UCase(shapeTo.Characters.Text) & "]")
-                        List1.ListIndex = List1.ListCount - 1
+                        Output.AddItem ("    link " & Replace(shapeVisio.Name, " ", "_") & " [" & UCase(shapeFrom.Characters.Text) & "] -> [" & UCase(shapeTo.Characters.Text) & "]")
+                        Output.ListIndex = Output.ListCount - 1
                         arcs = arcs + 1
-                        ' List1.Refresh
+                        ' Output.Refresh
                 End If
                 Else
                     outputFile.WriteLine ("        ERROR! link [" & shapeVisio.Name & "] have only " & shapeVisio.connects.Count & " connects")
-                    List1.AddItem ("ERROR! link [" & shapeVisio.Name & "] have only " & shapeVisio.connects.Count & " connects")
-                    List1.ListIndex = List1.ListCount - 1
-                    ' List1.Refresh
+                    Output.AddItem ("ERROR! link [" & shapeVisio.Name & "] have only " & shapeVisio.connects.Count & " connects")
+                    Output.ListIndex = Output.ListCount - 1
+                    ' Output.Refresh
                 End If
             ElseIf InStr(1, shapeVisio.Name, "label") > 0 Then
                 outputFile.WriteLine ("    label " & Replace(charactersVisio.Text, Chr(10), "\n"))
-                List1.AddItem ("    label " & Replace(charactersVisio.Text, Chr(10), " "))
-                List1.ListIndex = List1.ListCount - 1
-                ' List1.Refresh
+                Output.AddItem ("    label " & Replace(charactersVisio.Text, Chr(10), " "))
+                Output.ListIndex = Output.ListCount - 1
+                ' Output.Refresh
                 labl = Replace(charactersVisio.Text, Chr(10), " ")
             End If
         Next shapeVisio
         If states = 0 Then
             outputFile.WriteLine ("        ERROR! no states found on page " & pageVisio.Name)
-            List1.AddItem ("ERROR! no states found on page " & pageVisio.Name)
-            List1.ListIndex = List1.ListCount - 1
-            ' List1.Refresh
+            Output.AddItem ("ERROR! no states found on page " & pageVisio.Name)
+            Output.ListIndex = Output.ListCount - 1
+            ' Output.Refresh
         End If
         If arcs = 0 Then
             outputFile.WriteLine ("        ERROR! no arcs found on page " & pageVisio.Name)
-            List1.AddItem ("ERROR! no arcs found on page " & pageVisio.Name)
-            List1.ListIndex = List1.ListCount - 1
-            ' List1.Refresh
+            Output.AddItem ("ERROR! no arcs found on page " & pageVisio.Name)
+            Output.ListIndex = Output.ListCount - 1
+            ' Output.Refresh
         End If
         If labl = "" Then
             outputFile.WriteLine ("        ERROR! no label found on page " & pageVisio.Name)
-            List1.AddItem ("ERROR! no label found on page " & pageVisio.Name)
-            List1.ListIndex = List1.ListCount - 1
-            ' List1.Refresh
+            Output.AddItem ("ERROR! no label found on page " & pageVisio.Name)
+            Output.ListIndex = Output.ListCount - 1
+            ' Output.Refresh
         End If
 SKIP_PAGE_:
     Next pageVisio
-    List1.AddItem ("DONE, number of pages is " & pageNumber)
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("DONE, number of pages is " & pageNumber)
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
 End Sub
 
 
@@ -584,11 +633,11 @@ Private Sub GetIndex()
         states = 0
         labl = ""
         outputFile.WriteLine ((pageNumber) & " " & pageVisio.Name)
-        List1.AddItem ("page " & pageNumber & " " & pageVisio.Name)
+        Output.AddItem ("page " & pageNumber & " " & pageVisio.Name)
         pageNumber = pageNumber + 1
     Next pageVisio
-    List1.AddItem ("DONE, number of pages is " & pageNumber)
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("DONE, number of pages is " & pageNumber)
+    Output.ListIndex = Output.ListCount - 1
 End Sub
 
 
@@ -598,40 +647,40 @@ Sub ScanCurrentDocument()
     
     outputFilename = "./data.txt"
     
-    List1.AddItem ("Looking for Microsoft Visio")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("Looking for Microsoft Visio")
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
     Set appVisio = GetObject(, "visio.application")
     If appVisio Is Nothing Then
         Set appVisio = CreateObject("visio.application")
         If appVisio Is Nothing Then
-            List1.AddItem ("Error Opening Visio!")
-            List1.ListIndex = List1.ListCount - 1
-            ' List1.Refresh
+            Output.AddItem ("Error Opening Visio!")
+            Output.ListIndex = Output.ListCount - 1
+            ' Output.Refresh
             GoTo EXIT_
         End If
     End If
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
-        List1.AddItem ("Please Open Microsoft Visio Document")
-        List1.ListIndex = List1.ListCount - 1
-        ' List1.Refresh
+        Output.AddItem ("Please Open Microsoft Visio Document")
+        Output.ListIndex = Output.ListCount - 1
+        ' Output.Refresh
         GoTo EXIT_
     End If
          
     Set outputFile = FSO.CreateTextFile(outputFilename)
         
-    List1.AddItem ("Scanning current Microsoft Visio document")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("Scanning current Microsoft Visio document")
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
     GetData ("")
     
     outputFile.Close
   
-    List1.AddItem ("File  " + outputFilename + " created")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("File  " + outputFilename + " created")
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
      
 EXIT_:
 
@@ -644,40 +693,40 @@ Sub ScanCurrentPage()
     
     outputFilename = "./data.txt"
     
-    List1.AddItem ("Looking for Microsoft Visio")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("Looking for Microsoft Visio")
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
     Set appVisio = GetObject(, "visio.application")
     If appVisio Is Nothing Then
         Set appVisio = CreateObject("visio.application")
         If appVisio Is Nothing Then
-            List1.AddItem ("Error Opening Visio!")
-            List1.ListIndex = List1.ListCount - 1
-            ' List1.Refresh
+            Output.AddItem ("Error Opening Visio!")
+            Output.ListIndex = Output.ListCount - 1
+            ' Output.Refresh
             GoTo EXIT_
         End If
     End If
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
-        List1.AddItem ("Please Open Microsoft Visio Document")
-        List1.ListIndex = List1.ListCount - 1
-        ' List1.Refresh
+        Output.AddItem ("Please Open Microsoft Visio Document")
+        Output.ListIndex = Output.ListCount - 1
+        ' Output.Refresh
         GoTo EXIT_
     End If
          
     Set outputFile = FSO.CreateTextFile(outputFilename)
         
-    List1.AddItem ("Scanning current page")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("Scanning current page")
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
     GetData (appVisio.ActivePage.Name)
     
     outputFile.Close
   
-    List1.AddItem ("File  " + outputFilename + " created")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("File  " + outputFilename + " created")
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
      
 EXIT_:
 
@@ -689,42 +738,42 @@ Sub FixCurrentDocument()
     Dim sArgs() As String
     Dim iLoop As Integer
     
-    outputFilename = "./fix.txt"
+    'outputFilename = "./fix.txt"
     
-    List1.AddItem ("Looking for Microsoft Visio")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("Looking for Microsoft Visio")
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
     Set appVisio = GetObject(, "visio.application")
     If appVisio Is Nothing Then
         Set appVisio = CreateObject("visio.application")
         If appVisio Is Nothing Then
-            List1.AddItem ("Error Opening Visio!")
-            List1.ListIndex = List1.ListCount - 1
-            ' List1.Refresh
+            Output.AddItem ("Error Opening Visio!")
+            Output.ListIndex = Output.ListCount - 1
+            ' Output.Refresh
             GoTo EXIT_
         End If
     End If
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
-        List1.AddItem ("Please Open Microsoft Visio Document")
-        List1.ListIndex = List1.ListCount - 1
-        ' List1.Refresh
+        Output.AddItem ("Please Open Microsoft Visio Document")
+        Output.ListIndex = Output.ListCount - 1
+        ' Output.Refresh
         GoTo EXIT_
     End If
          
-    Set outputFile = FSO.CreateTextFile(outputFilename)
+    'Set outputFile = FSO.CreateTextFile(outputFilename)
         
-    List1.AddItem ("Scanning current Microsoft Visio document")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    Output.AddItem ("Scanning current Microsoft Visio document")
+    Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
     FixData
     
-    outputFile.Close
+    'outputFile.Close
   
-    List1.AddItem ("File  " + outputFilename + " created")
-    List1.ListIndex = List1.ListCount - 1
-    ' List1.Refresh
+    'Output.AddItem ("File  " + outputFilename + " created")
+    'Output.ListIndex = Output.ListCount - 1
+    ' Output.Refresh
      
 EXIT_:
 
@@ -737,35 +786,35 @@ Sub BuildIndexWholeDocument()
     
     outputFilename = "./index.txt"
     
-    List1.AddItem ("Looking for Microsoft Visio")
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("Looking for Microsoft Visio")
+    Output.ListIndex = Output.ListCount - 1
     Set appVisio = GetObject(, "visio.application")
     If appVisio Is Nothing Then
         Set appVisio = CreateObject("visio.application")
         If appVisio Is Nothing Then
-            List1.AddItem ("Error Opening Visio!")
-            List1.ListIndex = List1.ListCount - 1
+            Output.AddItem ("Error Opening Visio!")
+            Output.ListIndex = Output.ListCount - 1
             GoTo EXIT_
         End If
     End If
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
-        List1.AddItem ("Please Open Microsoft Visio Document")
-        List1.ListIndex = List1.ListCount - 1
+        Output.AddItem ("Please Open Microsoft Visio Document")
+        Output.ListIndex = Output.ListCount - 1
         GoTo EXIT_
     End If
          
     Set outputFile = FSO.CreateTextFile(outputFilename)
         
-    List1.AddItem ("Scanning current Microsoft Visio document")
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("Scanning current Microsoft Visio document")
+    Output.ListIndex = Output.ListCount - 1
     GetIndex
     
     outputFile.Close
   
-    List1.AddItem ("File  " + outputFilename + " created")
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("File  " + outputFilename + " created")
+    Output.ListIndex = Output.ListCount - 1
      
 EXIT_:
 
@@ -796,8 +845,8 @@ Private Sub Command3_Click()
     Dim fin As Integer
     Dim oShell As Object
     cmd = "python data2py.py ./data.txt ./structure.txt " & Text1.Text
-    List1.AddItem ("Running command " & cmd)
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("Running command " & cmd)
+    Output.ListIndex = Output.ListCount - 1
     Set oShell = CreateObject("Wscript.Shell")
     oShell.Run "%COMSPEC% /c " & cmd & " > generate.txt", 0, True
     fin = FreeFile
@@ -805,8 +854,8 @@ Private Sub Command3_Click()
         Open "generate.txt" For Input As #fin
         Do While Not EOF(fin)
             Line Input #fin, txtline$
-            List1.AddItem (txtline$)
-            List1.ListIndex = List1.ListCount - 1
+            Output.AddItem (txtline$)
+            Output.ListIndex = Output.ListCount - 1
         Loop
         Close #fin
     End If
@@ -820,8 +869,8 @@ Private Sub Command4_Click()
     Dim fin As Integer
     Dim oShell As Object
     cmd = "python merge.py ./structure.txt " & Text1.Text & " " & Combo1.Text & " " & Check1.Value & " " & Check2.Value & " " & Check3.Value
-    List1.AddItem ("Running command " & cmd)
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("Running command " & cmd)
+    Output.ListIndex = Output.ListCount - 1
     Set oShell = CreateObject("Wscript.Shell")
     oShell.Run "%COMSPEC% /c " & cmd & " > merge.txt", 0, True
     fin = FreeFile
@@ -829,8 +878,8 @@ Private Sub Command4_Click()
         Open "merge.txt" For Input As #fin
         Do While Not EOF(fin)
             Line Input #fin, txtline$
-            List1.AddItem (txtline$)
-            List1.ListIndex = List1.ListCount - 1
+            Output.AddItem (txtline$)
+            Output.ListIndex = Output.ListCount - 1
         Loop
         Close #fin
     End If
@@ -852,8 +901,8 @@ Private Sub Command7_Click()
     Dim oShell As Object
     Dim cmd As String
     cmd = "del " & Replace(Text1.Text, "/", "\\") & "\\*.py "
-    List1.AddItem ("Running command " & cmd)
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("Running command " & cmd)
+    Output.ListIndex = Output.ListCount - 1
     Set oShell = CreateObject("Wscript.Shell")
     oShell.Run "%COMSPEC% /c " & cmd, 0, True
 End Sub
@@ -886,16 +935,16 @@ Private Sub Form_Load()
                 Combo1.Text = Right(line, Len(line) - Len("existed") - 1)
             End If
         Next line
-        List1.AddItem ("Load path locations from visio2python.ini")
-        List1.ListIndex = List1.ListCount - 1
-        ' List1.Refresh
+        Output.AddItem ("Load path locations from visio2python.ini")
+        Output.ListIndex = Output.ListCount - 1
+        ' Output.Refresh
     Else
         Text1.Text = "./generated"
         Combo1.AddItem ("./")
         Combo1.Text = "./"
     End If
-    List1.AddItem ("Current folder: " & App.Path)
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("Current folder: " & App.Path)
+    Output.ListIndex = Output.ListCount - 1
     ChDrive App.Path
     ChDir App.Path
 End Sub
@@ -928,25 +977,25 @@ End Sub
 Private Sub Command10_Click()
     On Error Resume Next
 
-    List1.AddItem ("Looking for Microsoft Visio")
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("Looking for Microsoft Visio")
+    Output.ListIndex = Output.ListCount - 1
     
     Set appVisio = GetObject(, "visio.application")
     If appVisio Is Nothing Then
         Set appVisio = CreateObject("visio.application")
         If appVisio Is Nothing Then
-            List1.AddItem ("Error Opening Visio!")
-            List1.ListIndex = List1.ListCount - 1
-            ' List1.Refresh
+            Output.AddItem ("Error Opening Visio!")
+            Output.ListIndex = Output.ListCount - 1
+            ' Output.Refresh
             GoTo EXIT_
         End If
     End If
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
-        List1.AddItem ("Please Open Microsoft Visio Document")
-        List1.ListIndex = List1.ListCount - 1
-        ' List1.Refresh
+        Output.AddItem ("Please Open Microsoft Visio Document")
+        Output.ListIndex = Output.ListCount - 1
+        ' Output.Refresh
         GoTo EXIT_
     End If
     
@@ -959,25 +1008,25 @@ End Sub
 Private Sub Command11_Click()
     On Error Resume Next
 
-    List1.AddItem ("Looking for Microsoft Visio")
-    List1.ListIndex = List1.ListCount - 1
+    Output.AddItem ("Looking for Microsoft Visio")
+    Output.ListIndex = Output.ListCount - 1
     
     Set appVisio = GetObject(, "visio.application")
     If appVisio Is Nothing Then
         Set appVisio = CreateObject("visio.application")
         If appVisio Is Nothing Then
-            List1.AddItem ("Error Opening Visio!")
-            List1.ListIndex = List1.ListCount - 1
-            ' List1.Refresh
+            Output.AddItem ("Error Opening Visio!")
+            Output.ListIndex = Output.ListCount - 1
+            ' Output.Refresh
             GoTo EXIT_
         End If
     End If
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
-        List1.AddItem ("Please Open Microsoft Visio Document")
-        List1.ListIndex = List1.ListCount - 1
-        ' List1.Refresh
+        Output.AddItem ("Please Open Microsoft Visio Document")
+        Output.ListIndex = Output.ListCount - 1
+        ' Output.Refresh
         GoTo EXIT_
     End If
     

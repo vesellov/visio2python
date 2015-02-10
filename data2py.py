@@ -96,7 +96,7 @@ def main():
         label = info['label'].strip()
         modes = []
         if label:
-            if label.lower().startswith('bitpie.net'):
+            if label.lower().startswith('bitdust'):
                 lbl = label.split('\\n')[1]
             else:
                 lbl = label.split('\\n')[0]
