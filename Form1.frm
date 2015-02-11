@@ -427,6 +427,7 @@ Private Sub FixData()
     Dim arcs As Integer
     Dim states As Integer
     Dim labl As String
+    Dim i As Integer
     pageNumber = 0
     Count = 0
     diff = 0
@@ -434,53 +435,77 @@ Private Sub FixData()
         For Each shapeVisio In pageVisio.Shapes
             If InStr(1, shapeVisio.Name, "arrow") > 0 Then
                 Count = Count + 1
-                Dim i As Integer
-                For i = 0 To Len(shapeVisio.Text) - 1
-                    Set chars = shapeVisio.Characters
+                Set chars = shapeVisio.Characters
+                
+                Dim intCharCount As Integer
+                Dim intRunEnd As Integer
+                Dim intRunBegin As Integer
+                i = 0
+                intCharCount = chars.CharCount
+                
+                While (i + 1 < intCharCount)
+                    ' Set the characters object to span one character
                     chars.Begin = i
                     chars.End = i + 1
-                    Set celll = shapeVisio.CellsSRC(visSectionCharacter, i, visCharacterColor)
+                    ' Find the set of characters that
+                    ' share formatting with this character
+                    intRunEnd = chars.RunEnd(visCharPropRow)
+                    intRunBegin = chars.RunBegin(Visio.VisRunTypes.visCharPropRow)
+                    ' Set the characters object to span this run
+                    chars.Begin = intRunBegin
+                    chars.End = intRunEnd
+                    ' Update i so that the next time through the loop, we'll look
+                    ' at the first character after this run.
+                    i = intRunEnd
+                    Set celll = shapeVisio.CellsSRC(visSectionCharacter, chars.CharPropsRow(Visio.visBiasLeft), visCharacterColor)
                     If InStr(celll.Formula, "9") > 0 Then
-                        chars.CharProps(visCharacterColor) = 3
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 3
                     ElseIf InStr(celll.Formula, "0;128;0") > 0 Then
-                        chars.CharProps(visCharacterColor) = 3
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 3
                     ElseIf InStr(celll.Formula, "0,128,0") > 0 Then
+                        diff = diff + 1
                         chars.CharProps(visCharacterColor) = 3
-                        diff = diff + 1
                     ElseIf InStr(celll.Formula, "255;0;0") > 0 Then
-                        chars.CharProps(visCharacterColor) = 2
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 2
                     ElseIf InStr(celll.Formula, "255,0,0") > 0 Then
+                        diff = diff + 1
                         chars.CharProps(visCharacterColor) = 2
-                        diff = diff + 1
                     ElseIf InStr(celll.Formula, "0;0;255") > 0 Then
-                        chars.CharProps(visCharacterColor) = 7
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 7
                     ElseIf InStr(celll.Formula, "0,0,255") > 0 Then
-                        chars.CharProps(visCharacterColor) = 7
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 7
                     ElseIf InStr(celll.Formula, "0;255;255") > 0 Then
-                        chars.CharProps(visCharacterColor) = 7
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 7
                     ElseIf InStr(celll.Formula, "0,255,255") > 0 Then
+                        diff = diff + 1
                         chars.CharProps(visCharacterColor) = 7
-                        diff = diff + 1
                     ElseIf InStr(celll.Formula, "128;128;0") > 0 Then
-                        chars.CharProps(visCharacterColor) = 5
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 5
                     ElseIf InStr(celll.Formula, "128,128,0") > 0 Then
+                        diff = diff + 1
                         chars.CharProps(visCharacterColor) = 5
-                        diff = diff + 1
                     ElseIf InStr(celll.Formula, "0;0;0") > 0 Then
-                        chars.CharProps(visCharacterColor) = 14
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 14
                     ElseIf InStr(celll.Formula, "0,0,0") > 0 Then
-                        chars.CharProps(visCharacterColor) = 14
                         diff = diff + 1
+                        chars.CharProps(visCharacterColor) = 14
                     End If
-                Next i
+                    
+                Wend
+                                
+                
+                
+                
+                
+
                 If shapeVisio.CellsU("LineColor").Formula <> 19 Then
                     shapeVisio.CellsU("LineColor").Formula = 19
                     diff = diff + 1
@@ -574,7 +599,7 @@ Private Sub GetData(pageName As String)
                             End If
                             tmpTxt = tmpTxt & "        " & "{" & sColor & "#" & cellStyleVisio & "#" & Replace(charactersVisio.Text, Chr(10), "\n") & "} " & Chr(10)
                             iBegin = iEnd
-                        Next
+                        Next iRow
                         outputFile.WriteLine (tmpTxt)
                         Output.AddItem ("    link " & Replace(shapeVisio.Name, " ", "_") & " [" & UCase(shapeFrom.Characters.Text) & "] -> [" & UCase(shapeTo.Characters.Text) & "]")
                         Output.ListIndex = Output.ListCount - 1
