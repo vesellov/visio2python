@@ -165,6 +165,26 @@ Begin VB.Form Form1
       TabIndex        =   12
       Top             =   0
       Width           =   4935
+      Begin VB.CommandButton Command10 
+         Appearance      =   0  'Flat
+         BackColor       =   &H80000014&
+         Caption         =   "Generate JavaScript Code"
+         BeginProperty Font 
+            Name            =   "Tahoma"
+            Size            =   12
+            Charset         =   204
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   855
+         Left            =   2520
+         Style           =   1  'Graphical
+         TabIndex        =   20
+         Top             =   360
+         Width           =   2295
+      End
       Begin VB.CommandButton Command8 
          Appearance      =   0  'Flat
          BackColor       =   &H80000014&
@@ -240,7 +260,7 @@ Begin VB.Form Form1
          Style           =   1  'Graphical
          TabIndex        =   4
          Top             =   360
-         Width           =   4695
+         Width           =   2295
       End
       Begin VB.Label Label2 
          Appearance      =   0  'Flat
@@ -498,31 +518,40 @@ Private Sub FixData()
                         diff = diff + 1
                         chars.CharProps(visCharacterColor) = 14
                     End If
-                    
                 Wend
-                                
                 
-                
-                
-                
-
                 If shapeVisio.CellsU("LineColor").Formula <> 19 Then
                     shapeVisio.CellsU("LineColor").Formula = 19
                     diff = diff + 1
                 End If
+            
             ElseIf InStr(1, shapeVisio.Name, "state") > 0 Then
                 Count = Count + 1
                 If shapeVisio.CellsU("LineColor").Formula <> 19 Then
                     shapeVisio.CellsU("LineColor").Formula = 19
                     diff = diff + 1
                 End If
+                Set chars = shapeVisio.Characters
+                Set celll = shapeVisio.CellsSRC(visSectionCharacter, chars.CharPropsRow(Visio.visBiasLeft), visCharacterColor)
+                If celll.Formula <> "15" Then
+                    chars.CharProps(visCharacterColor) = 15
+                    diff = diff + 1
+                End If
+            
             ElseIf InStr(1, shapeVisio.Name, "label") > 0 Then
                 Count = Count + 1
                 If shapeVisio.CellsU("LineColor").Formula <> 19 Then
                     shapeVisio.CellsU("LineColor").Formula = 19
                     diff = diff + 1
                 End If
+                Set chars = shapeVisio.Characters
+                Set celll = shapeVisio.CellsSRC(visSectionCharacter, chars.CharPropsRow(Visio.visBiasLeft), visCharacterColor)
+                If celll.Formula <> "15" Then
+                    chars.CharProps(visCharacterColor) = 15
+                    diff = diff + 1
+                End If
             End If
+        
         Next shapeVisio
     Next pageVisio
     Output.AddItem ("Total " + Str(Count) + " shapes scanned, made " + Str(diff) + " changes")
@@ -583,7 +612,7 @@ Private Sub GetData(pageName As String)
                                 sColor = "(RGB(255;0;0))"
                             ElseIf sColor = "9" Then
                                 sColor = "(RGB(0;128;0))"
-                            ElseIf sColor = "4" Then
+                            ElseIf sColor = "4" Or sColor = "7" Then
                                 sColor = "(RGB(0;0;255))"
                             ElseIf sColor = "11" Then
                                 sColor = "(RGB(128;128;0))"
@@ -944,8 +973,12 @@ Private Sub Form_Load()
     Dim i As Integer
     Dim line, txt As String
     Dim lines() As String
-    If FSO.FileExists("visio2python.ini") Then
-        Set ts = FSO.opentextfile("visio2python.ini")
+    Dim inipath As String
+    inipath = App.Path & IIf(Right$(App.Path, 1) <> "\", "\", "") & "visio2python.ini"
+    Output.AddItem ("Current folder: " & App.Path)
+    Output.ListIndex = Output.ListCount - 1
+    If FSO.FileExists(inipath) Then
+        Set ts = FSO.opentextfile(inipath)
         txt = ts.ReadAll
         ts.Close
         lines = Split(txt, vbNewLine)
@@ -960,25 +993,27 @@ Private Sub Form_Load()
                 Combo1.Text = Right(line, Len(line) - Len("existed") - 1)
             End If
         Next line
-        Output.AddItem ("Load path locations from visio2python.ini")
+        Output.AddItem ("Load path locations from " & inipath)
         Output.ListIndex = Output.ListCount - 1
         ' Output.Refresh
     Else
+        Output.AddItem ("Not found ini file in " & inipath)
+        Output.ListIndex = Output.ListCount - 1
         Text1.Text = "./generated"
         Combo1.AddItem ("./")
         Combo1.Text = "./"
     End If
-    Output.AddItem ("Current folder: " & App.Path)
-    Output.ListIndex = Output.ListCount - 1
     ChDrive App.Path
     ChDir App.Path
 End Sub
 
 
-
+ 
 Private Sub Form_Unload(Cancel As Integer)
     Dim i As Integer
-    Set ts = FSO.CreateTextFile("visio2python.ini", True)
+    Dim inipath As String
+    inipath = App.Path & IIf(Right$(App.Path, 1) <> "\", "\", "") & "visio2python.ini"
+    Set ts = FSO.CreateTextFile(inipath, True)
     ts.WriteLine "generated " & Text1.Text
     ' ts.WriteLine "existed " & Combo1.Text
     For i = 0 To Combo1.ListCount - 1
@@ -1000,6 +1035,29 @@ End Sub
 
 
 Private Sub Command10_Click()
+    Dim cmd As String
+    Dim txtline As String
+    Dim fin As Integer
+    Dim oShell As Object
+    cmd = "python data2js.py ./data.txt ./structure.txt " & Text1.Text
+    Output.AddItem ("Running command " & cmd)
+    Output.ListIndex = Output.ListCount - 1
+    Set oShell = CreateObject("Wscript.Shell")
+    oShell.Run "%COMSPEC% /c " & cmd & " > generate.txt", 0, True
+    fin = FreeFile
+    If Dir("generate.txt") <> "" Then
+        Open "generate.txt" For Input As #fin
+        Do While Not EOF(fin)
+            Line Input #fin, txtline$
+            Output.AddItem (txtline$)
+            Output.ListIndex = Output.ListCount - 1
+        Loop
+        Close #fin
+    End If
+End Sub
+    
+    
+Private Sub Command1111_Click()
     On Error Resume Next
 
     Output.AddItem ("Looking for Microsoft Visio")

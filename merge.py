@@ -197,7 +197,7 @@ def mergeStateMachine(old, new, name):
                                                'link_id': link_id,})
                     
         else:
-            if paragraph == paragraph_def_A:
+            if paragraph == paragraph_def_A or line_index == len(lines):
                 if found_condition and found_state:
                     link_id = processLink(name, found_condition, found_state, found_state)
                     found_condition = ''
