@@ -37,7 +37,7 @@ taken from the article above,
 I draw it using [this Microsoft Visio stancil](http://bitdust.io/visio2python/automats.vss).
  
 
-![img](http://gitlab.bitdust.io/devel/visio2python/raw/master/automat1.png)
+![img](http://bitdust.io/visio2python/automat1.png)
 
 Here is:
  * three states: **BEFORE**, **INSIDE** and **AFTER**,
@@ -50,7 +50,7 @@ Here is:
 Using **visio2python** I generate Python code for this drawing.
  
 
-![img](http://gitlab.bitdust.io/devel/visio2python/raw/master/visio2python-screen1.png)
+![img](http://bitdust.io/visio2python/visio2python-screen1.png)
 
  
 It was written in the file ./generated/Automat_1.py, here is the file contents:
@@ -118,7 +118,7 @@ This is an automatically generated code, a template to create a complete program
  
  
 Class **`Automat1`** is a sub class of base class 
-[automat.Automat](http://gitlab.bitdust.io/devel/visio2python/raw/master/automat.py) which runs the state machine.
+[automat.Automat](http://bitdust.io/visio2python/automat.py) which runs the state machine.
  
 
  
@@ -212,7 +212,7 @@ You see how simple is to write conditions and actions methods. No chance to make
  
 
  
-Take the file [**automat.py**](http://gitlab.bitdust.io/devel/visio2python/raw/master/automat.py), 
+Take the file [**automat.py**](http://bitdust.io/visio2python/automat.py), 
 place it in the same folder and run the code to test it.
  
 
@@ -279,7 +279,7 @@ In the class **`automat.Automat`** you can use a timer event and pass it into co
 Let's see another sample that simulates a traffic light. Here is a state machine:
  
 
-![img](http://gitlab.bitdust.io/devel/visio2python/raw/master/automat2.png)
+![img](http://bitdust.io/visio2python/automat2.png)
 
  
 And working code:
@@ -398,7 +398,7 @@ In Microsoft Visio open dialog **Tools->Color Palette** and check color indexes.
 Here is a table of used colors, 
 your palette should have same indexes and values to be compatible with **visio2python**.
  
-<table align=center border=1 cellspacing=0 cellpadding=5>
+<table align=center border=1 cellspacing=0 cellpadding=4 style="display:table;">
 <tr><th>index</th><th>name</th><th>value</th><th>used for</th></tr>
 <tr><td>0</td><td>black</td><td>0,0,0</td><td>all other characters</td></tr>
 <tr><td>2</td><td>red</td><td>128,0,0</td><td>events</td></tr>
@@ -412,7 +412,7 @@ Just need to be sure you are using right colors for conditions, actions, events 
 Mine palette looks like this:
  
 
-<div align=center>![img](http://gitlab.bitdust.io/devel/visio2python/raw/master/color-palette.png)</div>
+![img](http://bitdust.io/visio2python/color-palette.png)
 
  
 After you did generated the Python code for your future program you will need to modify it to make it working, 

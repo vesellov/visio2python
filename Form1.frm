@@ -181,7 +181,7 @@ Begin VB.Form Form1
          Height          =   855
          Left            =   2520
          Style           =   1  'Graphical
-         TabIndex        =   20
+         TabIndex        =   19
          Top             =   360
          Width           =   2295
       End
@@ -302,27 +302,6 @@ Begin VB.Form Form1
       TabIndex        =   11
       Top             =   0
       Width           =   4935
-      Begin VB.CommandButton Command9 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Scan and Fix All Shapes"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   0
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   1575
-         Left            =   120
-         MaskColor       =   &H00FFFFFF&
-         Style           =   1  'Graphical
-         TabIndex        =   19
-         Top             =   1200
-         Width           =   2295
-      End
       Begin VB.CommandButton Command5 
          Appearance      =   0  'Flat
          BackColor       =   &H80000014&
@@ -337,12 +316,12 @@ Begin VB.Form Form1
             Strikethrough   =   0   'False
          EndProperty
          Height          =   735
-         Left            =   2520
+         Left            =   120
          MaskColor       =   &H00FFFFFF&
          Style           =   1  'Graphical
          TabIndex        =   3
          Top             =   2040
-         Width           =   2295
+         Width           =   4695
       End
       Begin VB.CommandButton Command1 
          Appearance      =   0  'Flat
@@ -380,12 +359,12 @@ Begin VB.Form Form1
             Strikethrough   =   0   'False
          EndProperty
          Height          =   735
-         Left            =   2520
+         Left            =   120
          MaskColor       =   &H00FFFFFF&
          Style           =   1  'Graphical
          TabIndex        =   2
          Top             =   1200
-         Width           =   2295
+         Width           =   4695
       End
    End
 End
