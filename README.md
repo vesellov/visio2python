@@ -430,6 +430,13 @@ I hope **visio2python** is compatible with other versions.<br>
 You can even run Microsoft Visio on Ubuntu [using WineHQ](http://appdb.winehq.org/appview.php?appId=119), I did it for my self.
  
 
- 
+
 This tool is written in Microsoft Visual Basic 6.0.
- 
+
+
+Here is an official git repository for developers: [http://gitlab.bitdust.io/devel/visio2python](http://gitlab.bitdust.io/devel/visio2python).
+
+Please, contact [Veselin Penev](http://bitdust.io/about_us) if you have any questions, or want to participate and improve visio2python tool.
+
+
+
