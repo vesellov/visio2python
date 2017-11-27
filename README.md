@@ -34,10 +34,10 @@ and of ["Save the best in the universities of Russia"](http://www.savethebest.ru
 Let's see how it looks on the picture. On the picture below you see a transition graph of state machine for  
 [this sample program](http://en.wikipedia.org/wiki/Automata-Based_Programming#Example) 
 taken from the article above,
-I draw it using [this Microsoft Visio stancil](http://bitdust.io/visio2python/automats.vss).
+I draw it using [this Microsoft Visio stancil](automats.vss).
  
 
-![img](http://bitdust.io/visio2python/automat1.png)
+![img](automat1.png)
 
 Here is:
  * three states: **BEFORE**, **INSIDE** and **AFTER**,
@@ -50,7 +50,7 @@ Here is:
 Using **visio2python** I generate Python code for this drawing.
  
 
-![img](http://bitdust.io/visio2python/visio2python-screen1.png)
+![img](visio2python-screen1.png)
 
  
 It was written in the file ./generated/Automat_1.py, here is the file contents:
@@ -118,7 +118,7 @@ This is an automatically generated code, a template to create a complete program
  
  
 Class **`Automat1`** is a sub class of base class 
-[automat.Automat](http://bitdust.io/visio2python/automat.py) which runs the state machine.
+[automat.Automat](automat.py) which runs the state machine.
  
 
  
@@ -212,7 +212,7 @@ You see how simple is to write conditions and actions methods. No chance to make
  
 
  
-Take the file [**automat.py**](http://bitdust.io/visio2python/automat.py), 
+Take the file [**automat.py**](automat.py), 
 place it in the same folder and run the code to test it.
  
 
@@ -279,7 +279,7 @@ In the class **`automat.Automat`** you can use a timer event and pass it into co
 Let's see another sample that simulates a traffic light. Here is a state machine:
  
 
-![img](http://bitdust.io/visio2python/automat2.png)
+![img](automat2.png)
 
  
 And working code:
@@ -412,7 +412,7 @@ Just need to be sure you are using right colors for conditions, actions, events 
 Mine palette looks like this:
  
 
-![img](http://bitdust.io/visio2python/color-palette.png)
+![img](color-palette.png)
 
  
 After you did generated the Python code for your future program you will need to modify it to make it working, 

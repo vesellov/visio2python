@@ -16,7 +16,7 @@ Description="Extract state machine info from Microsoft Visio Document and save i
 CompatibleMode="0"
 MajorVer=1
 MinorVer=0
-RevisionVer=78
+RevisionVer=79
 AutoIncrementVer=1
 ServerSupportFiles=0
 VersionComments="Extract state machine info from Microsoft Visio Document and save in the text file"
@@ -39,3 +39,6 @@ Retained=0
 ThreadPerObject=0
 MaxNumberOfThreads=1
 DebugStartupOption=0
+
+[MS Transaction Server]
+AutoRefresh=1

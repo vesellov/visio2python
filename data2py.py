@@ -96,7 +96,7 @@ def main():
         label = info['label'].strip()
         modes = []
         if label:
-            if label.lower().startswith('bitdust'):
+            if label.count('\\n') >= 2 or label.lower().startswith('bitdust'):
                 lbl = label.split('\\n')[1]
             else:
                 lbl = label.split('\\n')[0]
@@ -141,7 +141,7 @@ def main():
                         underlined = True
                     if underlined and style == 0:
                         is_action = True
-                    if word.strip().startswith('do'):
+                    if word.strip().startswith('do') and color == '[0;0;255]':
                         is_action = True
                     if color == '[128;128;0]' and word.lower() == word and word.count('.state') == 0 and word.rstrip().endswith('('):
                         is_action = True 
@@ -295,9 +295,9 @@ def main():
                 has_conditions = True
 
                 if link_index == 0:
-                    src += "            if %s :\n" % condition
+                    src += "            if %s:\n" % condition
                 else:
-                    src += "            elif %s :\n" % condition
+                    src += "            elif %s:\n" % condition
                 
                 d[page]['links'][link_id]['condition'] = condition
 
@@ -407,10 +407,7 @@ def main():
                 src += '        """\n'
                 src += '        Remove all references to the state machine object to destroy it.\n'
                 src += '        """\n'
-                src += '        automat.objects().pop(self.index)\n'
-                src += '        global _%s\n' % classname
-                src += '        del _%s\n' % classname
-                src += '        _%s = None\n\n' % classname
+                src += '        self.unregister()\n\n'
             else:
                 src += '        """\n'
                 src += '        Action method.\n'
@@ -421,16 +418,39 @@ def main():
             
         #---header
         head = ''
+        head += '''#!/usr/bin/env python
+# {}.py
+#
+# Copyright (C) 2008-2016 Veselin Penev, http://bitdust.io
+#
+# This file ({}.py) is part of BitDust Software.
+#
+# BitDust is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# BitDust Software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with BitDust Software.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Please contact us if you have any questions at bitdust.io@gmail.com
+        '''.format(automatname.replace('(', '').replace(')', ''), automatname.replace('(', '').replace(')', ''))
         head += '\n\n"""\n'
         head += '.. module:: %s\n' % automatname.replace('(', '').replace(')', '')
         head += '.. role:: red\n\n'
         if label:
             head += ' '.join(label.split('\\n'))
             head += '\n\n'
-        head += '.. raw:: html\n\n'
-        head += '    <a href="%s.png" target="_blank">\n' % automatname.replace('(', '').replace(')', '')
-        head += '    <img src="%s.png" style="max-width:100%%;">\n' % automatname.replace('(', '').replace(')', '')
-        head += '    </a>\n\n'
+        if False:
+            head += '.. raw:: html\n\n'
+            head += '    <a href="%s.png" target="_blank">\n' % automatname.replace('(', '').replace(')', '')
+            head += '    <img src="%s.png" style="max-width:100%%;">\n' % automatname.replace('(', '').replace(')', '')
+            head += '    </a>\n\n'
         head += 'EVENTS:\n'
         for event in sorted(d[page]['events']):
             head += '    * :red:`%s`\n' % event
@@ -440,32 +460,35 @@ def main():
                 head += '    * %s\n' % error
                 print '    ERROR:', error
         head += '"""\n\n\n'
-        head += 'import automat\n\n\n'
-        head += '_%s = None\n\n\n' % classname
-        head += 'def A(event=None, arg=None):\n'
-        head += '    """\n'
-        head += '    Access method to interact with %s machine.\n' % automatname
-        head += '    """\n'
-        head += '    global _%s\n' % classname
-        head += '    if _%s is None:\n' % classname
-        head += '        # set automat name and starting state here\n'
-        head += '        _%s = %s(\'%s\', \'%s\')\n' % (classname, 
-                                                        classname, 
-                                                        automatname.replace('(', '').replace(')', ''), 
-                                                        d[page]['states'][0])
-        head += '    if event is not None:\n'
-        head += '        _%s.automat(event, arg)\n' % classname
-        head += '    return _%s\n\n\n' % classname
-        head += 'def Destroy():\n'
-        head += '    """\n'
-        head += '    Destroy %s automat and remove its instance from memory.\n' % automatname 
-        head += '    """\n'
-        head += '    global _%s\n' % classname
-        head += '    if _%s is None:\n' % classname
-        head += '        return\n'
-        head += '    _%s.destroy()\n' % classname
-        head += '    del _%s\n' % classname
-        head += '    _%s = None\n\n\n' % classname
+        head += 'from automats import automat\n\n\n'
+        if False:
+            head += '_%s = None\n\n\n' % classname
+            head += 'def A(event=None, arg=None):\n'
+            head += '    """\n'
+            head += '    Access method to interact with %s machine.\n' % automatname
+            head += '    """\n'
+            head += '    global _%s\n' % classname
+            head += '    if event is None and arg is None:\n'
+            head += '        return _%s\n' % classname
+            head += '    if _%s is None:\n' % classname
+            head += '        # set automat name and starting state here\n'
+            head += '        _%s = %s(\'%s\', \'%s\')\n' % (classname, 
+                                                            classname, 
+                                                            automatname.replace('(', '').replace(')', ''), 
+                                                            d[page]['states'][0])
+            head += '    if event is not None:\n'
+            head += '        _%s.automat(event, arg)\n' % classname
+            head += '    return _%s\n\n\n' % classname
+            head += 'def Destroy():\n'
+            head += '    """\n'
+            head += '    Destroy %s automat and remove its instance from memory.\n' % automatname 
+            head += '    """\n'
+            head += '    global _%s\n' % classname
+            head += '    if _%s is None:\n' % classname
+            head += '        return\n'
+            head += '    _%s.destroy()\n' % classname
+            head += '    del _%s\n' % classname
+            head += '    _%s = None\n\n\n' % classname
         head += 'class %s(automat.Automat):\n' % classname
         head += '    """\n'
         head += '    This class implements all the functionality of the ``%s()`` state machine.\n' % automatname.replace('(', '').replace(')', '')
@@ -506,6 +529,13 @@ def main():
             head += '        }\n\n'
             head += '    def msg(self, msgid, arg=None):\n'
             head += "        return self.MESSAGES.get(msgid, '')\n\n"
+
+        head += '    def __init__(self, state):\n'
+        head += '        """\n'
+        head += '        Create %s state machine.\n' % (automatname,)
+        head += '        Use this method if you need to call Automat.__init__() in a special way.\n'
+        head += '        """\n'
+        head += '        super(%s, self).__init__("%s", state)\n\n' % (classname, automatname.replace('()','')) 
         head += '    def init(self):\n'
         head += '        """\n'
         head += '        Method to initialize additional variables and flags\n' 
@@ -522,18 +552,19 @@ def main():
         head += '        """\n\n'
         head += '    def A(self, event, arg):\n'
         head += '        """\n'
-        head += '        The state machine code, generated using `visio2python <http://code.google.com/p/visio2python/>`_ tool.\n'
+        head += '        The state machine code, generated using `visio2python <http://bitdust.io/visio2python/>`_ tool.\n'
         head += '        """\n'
 
         #---tail
         tail = ''
         if 'init' in d[page]['events']:
-            tail += '\n\ndef main():\n'
-            tail += '    from twisted.internet import reactor\n'
-            tail += "    reactor.callWhenRunning(A, 'init')\n"
-            tail += '    reactor.run()\n\n'
-            tail += 'if __name__ == "__main__":\n'
-            tail += '    main()\n\n'
+            if False:
+                tail += '\n\ndef main():\n'
+                tail += '    from twisted.internet import reactor\n'
+                tail += "    reactor.callWhenRunning(A, 'init')\n"
+                tail += '    reactor.run()\n\n'
+                tail += 'if __name__ == "__main__":\n'
+                tail += '    main()\n\n'
 
         #---modes
         if 'post' in modes and 'fast' in modes:

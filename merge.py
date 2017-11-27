@@ -246,9 +246,9 @@ def mergeStateMachine(old, new, name):
             actions = D[name]['links'][link_id]['actions']
             # print link_id, actions
             if link_index == 0:
-                merged += "            if %s :\n" % condition
+                merged += "            if %s:\n" % condition
             else:
-                merged += "            elif %s :\n" % condition
+                merged += "            elif %s:\n" % condition
             has_actions = has_actions or len(actions) > 0
             if len(actions) == 0:
                 merged += "                pass\n"
@@ -275,10 +275,10 @@ def mergeStateMachine(old, new, name):
             condition = D[name]['links'][link_id]['condition']
             actions = D[name]['links'][link_id]['actions']
             if not first_link:
-                merged += "            if %s :\n" % condition
+                merged += "            if %s:\n" % condition
                 first_link = link_id
             else:
-                merged += "            elif %s :\n" % condition
+                merged += "            elif %s:\n" % condition
             has_actions = has_actions or len(actions) > 0
             if len(actions) == 0:
                 merged += "                pass\n"

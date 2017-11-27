@@ -595,6 +595,10 @@ Private Sub GetData(pageName As String)
                                 sColor = "(RGB(0;0;255))"
                             ElseIf sColor = "11" Then
                                 sColor = "(RGB(128;128;0))"
+                            ElseIf sColor = "(RGB(127;0;0))" Then
+                                sColor = "(RGB(128;0;0))"
+                            ElseIf sColor = "(RGB(1;1;1))" Then
+                                sColor = "(RGB(0;0;0))"
                             End If
                             sColor = Replace(sColor, "(RGB(", "[")
                             sColor = Replace(sColor, "))", "]")

@@ -512,7 +512,7 @@ def main():
 #        head += '        """\n\n'
 #        head += '    def A(self, event, arg):\n'
 #        head += '        """\n'
-#        head += '        The state machine code, generated using `visio2python <http://code.google.com/p/visio2python/>`_ tool.\n'
+#        head += '        The state machine code, generated using `visio2python <http://bitdust.io/visio2python/>`_ tool.\n'
 #        head += '        """\n'
 
         #---tail
