@@ -8,17 +8,16 @@ the [BitDust](http://bitdust.io) project, so it might be usefull for other devel
 
 The tool **visio2python** generates [Python](http://python.org) code from graphical diagrams created in 
 [Microsoft Visio](http://en.wikipedia.org/wiki/Microsoft_Visio). 
-So you can "draw" your idea, press the button, execute the code and see how it works. 
+So you can "draw" your idea, press the button, execute automatically generated Python code and see how it works. 
 Less code, more visualisation, fast development, more stability.
  
 
  
-The key here is the use of [finite state machines](http://en.wikipedia.org/wiki/Finite-state_machine) 
-to describe the algorithm of the program. 
+The key aspect here is the use of [finite state machines](http://en.wikipedia.org/wiki/Finite-state_machine) 
+to describe behaviour of your program. 
 This approach also known as [Automata-Based Programming](http://en.wikipedia.org/wiki/Automata-Based_Programming).
 My professor [Anatoly Abramovich Shalyto](http://en.wikipedia.org/wiki/Anatoly_Shalyto) 
-gave me this knowledge - 
-in those wonderful days when I was 
+gave me that knowledge - those wonderful days when I was studying
 [at university](http://en.ifmo.ru/). Great Thanks to Him!.
  
 
@@ -434,9 +433,9 @@ You can even run Microsoft Visio on Ubuntu [using WineHQ](http://appdb.winehq.or
 This tool is written in Microsoft Visual Basic 6.0.
 
 
-Here is an official git repository for developers: [http://gitlab.bitdust.io/devel/visio2python](http://gitlab.bitdust.io/devel/visio2python).
+Here is an official git repository for developers: [http://github.com/vesellov/visio2python](http://github.com/vesellov/visio2python).
 
-Please, contact [Veselin Penev](http://bitdust.io/about_us) if you have any questions, or want to participate and improve visio2python tool.
+Please, contact [Veselin Penev](https://bitdust.io/#slide-7) if you have any questions, or want to participate and improve visio2python tool.
 
 
 

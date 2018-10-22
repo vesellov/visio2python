@@ -543,7 +543,7 @@ def mergeTimers(old, new, name):
         if delay == 0:
             errors.append('    WARNING: can not understand timer event: %s' % timer)
             continue
-        stimers += "        '%s': (%s, [%s]),\n" % (timer, str(delay), ','.join(map(lambda x: "'%s'" % x, states)))
+        stimers += "        '%s': (%s, [%s]),\n" % (timer, str(delay), ', '.join(map(lambda x: "'%s'" % x, states)))
         
 #    print start_line, end_line
 #    print stimers

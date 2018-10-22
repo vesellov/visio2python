@@ -1,18 +1,41 @@
-#!/usr/bin/python
-#data2py.py
+#!/usr/bin/env python
+# data2py.py
 #
+# Copyright (C) 2008-2016 Veselin Penev, http://bitdust.io
 #
-# <<<COPYRIGHT>>>
+# This file (data2py.py) is part of BitDust Software.
 #
+# BitDust is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
+# BitDust Software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
 #
+# You should have received a copy of the GNU Affero General Public License
+# along with BitDust Software.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Please contact us if you have any questions at bitdust.io@gmail.com
+
 
 import os
 import sys
 import re
 import string
 import pprint
+
+
+def split_name_vs_state(inp):
+    if inp.count('(') == 1 and inp.count(')') == 1:
+        name, _, state = inp.partition('(')
+        state = state.rstrip(')')
+        if state:
+            return name, state
+    return inp, 'AT_STARTUP'
+
 
 def main():
     d = {}
@@ -91,8 +114,9 @@ def main():
         filename = page.replace('()', '') + '.py'
         filepath = os.path.abspath(os.path.join(sys.argv[3], filename))
         print 'creating', filepath
-        automatname = page.replace('()', '')
-        classname = ''.join(map(string.capitalize, page.replace('()', '').split('_')))
+        automatname, begin_state = split_name_vs_state(page)
+        # automatname = page.replace('()', '')
+        classname = ''.join(map(string.capitalize, automatname.split('_')))
         label = info['label'].strip()
         modes = []
         if label:
@@ -100,11 +124,14 @@ def main():
                 lbl = label.split('\\n')[1]
             else:
                 lbl = label.split('\\n')[0]
-            classname = ''.join(map(string.capitalize, lbl.replace('()', '').split('_')))
-            automatname = lbl
+            automatname, begin_state = split_name_vs_state(lbl)
+            classname = ''.join(map(string.capitalize, automatname.split('_')))
+            # automatname = lbl
             if label.endswith(']'):
                 for mod in label.split('\\n')[-1].strip('[]').split(','):
                     modes.append(mod.strip())
+        classname = classname.replace('(', '').replace(')', '')
+        automatname = automatname.replace('(', '').replace(')', '')
         src = ''
         src_switch = ''
         src_actions = ''
@@ -407,7 +434,7 @@ def main():
                 src += '        """\n'
                 src += '        Remove all references to the state machine object to destroy it.\n'
                 src += '        """\n'
-                src += '        self.unregister()\n\n'
+                src += '        self.destroy()\n\n'
             else:
                 src += '        """\n'
                 src += '        Action method.\n'
@@ -438,8 +465,8 @@ def main():
 # You should have received a copy of the GNU Affero General Public License
 # along with BitDust Software.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Please contact us if you have any questions at bitdust.io@gmail.com
-        '''.format(automatname.replace('(', '').replace(')', ''), automatname.replace('(', '').replace(')', ''))
+# Please contact us if you have any questions at bitdust.io@gmail.com'''.format(
+            automatname.replace('(', '').replace(')', ''), automatname.replace('(', '').replace(')', ''))
         head += '\n\n"""\n'
         head += '.. module:: %s\n' % automatname.replace('(', '').replace(')', '')
         head += '.. role:: red\n\n'
@@ -461,11 +488,11 @@ def main():
                 print '    ERROR:', error
         head += '"""\n\n\n'
         head += 'from automats import automat\n\n\n'
-        if False:
+        if True:
             head += '_%s = None\n\n\n' % classname
             head += 'def A(event=None, arg=None):\n'
             head += '    """\n'
-            head += '    Access method to interact with %s machine.\n' % automatname
+            head += '    Access method to interact with `%s()` machine.\n' % automatname
             head += '    """\n'
             head += '    global _%s\n' % classname
             head += '    if event is None and arg is None:\n'
@@ -475,13 +502,13 @@ def main():
             head += '        _%s = %s(\'%s\', \'%s\')\n' % (classname, 
                                                             classname, 
                                                             automatname.replace('(', '').replace(')', ''), 
-                                                            d[page]['states'][0])
+                                                            begin_state)
             head += '    if event is not None:\n'
             head += '        _%s.automat(event, arg)\n' % classname
             head += '    return _%s\n\n\n' % classname
             head += 'def Destroy():\n'
             head += '    """\n'
-            head += '    Destroy %s automat and remove its instance from memory.\n' % automatname 
+            head += '    Destroy `%s()` automat and remove its instance from memory.\n' % automatname 
             head += '    """\n'
             head += '    global _%s\n' % classname
             head += '    if _%s is None:\n' % classname
@@ -491,7 +518,7 @@ def main():
             head += '    _%s = None\n\n\n' % classname
         head += 'class %s(automat.Automat):\n' % classname
         head += '    """\n'
-        head += '    This class implements all the functionality of the ``%s()`` state machine.\n' % automatname.replace('(', '').replace(')', '')
+        head += '    This class implements all the functionality of ``%s()`` state machine.\n' % automatname.replace('(', '').replace(')', '')
         head += '    """\n\n'
         #---mode "fast"
         if 'fast' in modes:
@@ -520,7 +547,7 @@ def main():
                 if delay == 0:
                     print '    WARNING: can not understand timer event:', timer
                     continue
-                head += "        '%s': (%s, [%s]),\n" % (timer, str(delay), ','.join(map(lambda x: "'%s'" % x, states)))
+                head += "        '%s': (%s, [%s]),\n" % (timer, str(delay), ', '.join(map(lambda x: "'%s'" % x, states)))
             head += '        }\n\n'
         if d[page]['msgfunc']:
             head += '    MESSAGES = {\n'
@@ -529,26 +556,32 @@ def main():
             head += '        }\n\n'
             head += '    def msg(self, msgid, arg=None):\n'
             head += "        return self.MESSAGES.get(msgid, '')\n\n"
-
-        head += '    def __init__(self, state):\n'
+        head += '    def __init__(self, debug_level=0, log_events=False, log_transitions=False, publish_events=False, **kwargs):\n'
         head += '        """\n'
-        head += '        Create %s state machine.\n' % (automatname,)
-        head += '        Use this method if you need to call Automat.__init__() in a special way.\n'
+        head += '        Builds `%s()` state machine.\n' % (automatname,)
         head += '        """\n'
-        head += '        super(%s, self).__init__("%s", state)\n\n' % (classname, automatname.replace('()','')) 
+        head += '        super(%s, self).__init__(\n' % classname
+        head += '            name="%s",\n' % automatname.replace('()','') 
+        head += '            state="%s",\n' % begin_state
+        head += '            debug_level=debug_level,\n'
+        head += '            log_events=log_events,\n'
+        head += '            log_transitions=log_transitions,\n'
+        head += '            publish_events=publish_events,\n'
+        head += '            **kwargs\n'
+        head += '        )\n\n'
         head += '    def init(self):\n'
         head += '        """\n'
         head += '        Method to initialize additional variables and flags\n' 
-        head += '        at creation phase of %s machine.\n' % automatname
+        head += '        at creation phase of `%s()` machine.\n' % automatname
         head += '        """\n\n'
         head += '    def state_changed(self, oldstate, newstate, event, arg):\n'
         head += '        """\n'
-        head += '        Method to catch the moment when %s state were changed.\n' % automatname
+        head += '        Method to catch the moment when `%s()` state were changed.\n' % automatname
         head += '        """\n\n'
         head += '    def state_not_changed(self, curstate, event, arg):\n'
         head += '        """\n'
-        head += '        This method intended to catch the moment when some event was fired in the %s\n' % automatname
-        head += '        but its state was not changed.\n'
+        head += '        This method intended to catch the moment when some event was fired in the `%s()`\n' % automatname
+        head += '        but automat state was not changed.\n'
         head += '        """\n\n'
         head += '    def A(self, event, arg):\n'
         head += '        """\n'
@@ -583,4 +616,8 @@ def main():
           
    
 if __name__ == '__main__':
-    main()   
+    try:
+        main()
+    except:
+        import traceback
+        traceback.print_exc()
