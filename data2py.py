@@ -92,7 +92,7 @@ def main():
         #---ERROR!
         if line.startswith('ERROR!'):
             d[page]['errors'].append(line[6:])
-            print 'ERROR', line[6:]
+            print('ERROR %s' % line[6:])
             continue
 
         words = line.strip('{}').split('#')
@@ -107,13 +107,13 @@ def main():
             d[page]['links'][link_id]['data'].append([color, style, word])
         
     # print
-    print 'Found %d pages in the file "%s"' % (len(d), sys.argv[1])
+    print('Found %d pages in the file "%s"' % (len(d), sys.argv[1]))
     # print
    
     for page, info in d.items():
         filename = page.replace('()', '') + '.py'
         filepath = os.path.abspath(os.path.join(sys.argv[3], filename))
-        print 'creating', filepath
+        print('creating %s' % filepath)
         automatname, begin_state = split_name_vs_state(page)
         # automatname = page.replace('()', '')
         classname = ''.join(map(string.capitalize, automatname.split('_')))
@@ -148,7 +148,7 @@ def main():
                 src += "        elif self.state == '%s':\n" % state
 
             link_index = 0
-            
+
             for link_id, link in info['links'].items():
 
                 if link['from'] != state:
@@ -163,7 +163,7 @@ def main():
                 for color, style, word in link['data']:
                     if word.strip() == '':
                         continue
-                    
+
                     if style != 0:
                         underlined = True
                     if underlined and style == 0:
@@ -192,19 +192,19 @@ def main():
                                     d[page]['timers'][event] = []
                                 if state not in d[page]['timers'][event]:
                                     d[page]['timers'][event].append(state) 
-                            
+
                     elif color == '[0;0;0]':
                         if is_action:
                             w = word.strip()
-                            if w not in ['and', 'or', 'not', ',', ';', 'arg']:
+                            if w not in ['and', 'or', 'not', ',', ';', 'arg', 'args', 'kwargs']:
                                 i = w.find('MSG')
                                 if i >= 0:
                                     if i > 0:
                                         d[page]['messages'].append(w[i:])
-                                        w = "%sself.msg('%s', arg)" % (w[:i-1], w[i:])
+                                        w = "%sself.msg('%s', *args, **kwargs)" % (w[:i-1], w[i:])
                                     else:
                                         d[page]['messages'].append(w)
-                                        w = "self.msg('%s', arg)" % w
+                                        w = "self.msg('%s', *args, **kwargs)" % w
                                     d[page]['msgfunc'] = True
                                 else:   
                                     if not ( w.count(' ') or w.count(',') ): 
@@ -215,14 +215,17 @@ def main():
                             if condition and condition[-1] != ' ':
                                 condition += ' '
                             condition += word.lstrip() 
-                    
+
                     elif color == '[0;128;0]':
                         if condition and condition[-1] != ' ':
                             condition += ' '
                         # if word.count(')') > word.count('(') and word.count('(') == 1:
                         if re.search('is\w+?\(\)', word.strip()):
-                            condition += 'self.' + word.strip().replace('()', '(arg)').lstrip()
-                            d[page]['conditions'].add('self.' + word.strip().replace('()', '(arg)'))
+                            condition += 'self.' + word.strip().replace('()', '(*args, **kwargs)').lstrip()
+                            d[page]['conditions'].add('self.' + word.strip().replace('()', '(*args, **kwargs)'))
+                        elif re.search('is\w+?\(\w+?\)', word.strip()):
+                            condition += 'self.' + word.strip().replace(')', ', *args, **kwargs)').lstrip()
+                            d[page]['conditions'].add('self.' + word.strip().replace(')', ', *args, **kwargs)'))
                         elif word.count('.state'):
                             condition += word.strip().replace('.state', '.A().state')
                         elif word.count(','):
@@ -237,7 +240,7 @@ def main():
                             condition += word.strip().replace('len(', 'len(self.')
                         else:
                             condition += 'self.' + word.strip()
-                    
+
                     elif color == '[128;128;0]': 
                         if is_action:
                             actions.append("%s" % word.strip().replace('(', '.A('))
@@ -245,7 +248,7 @@ def main():
                             if condition and condition[-1] != ' ':
                                 condition += ' '
                             condition += '%s' % word.replace('().state', '.A().state').lstrip()
-                        
+
                     elif color == '[0;0;255]':
                         if is_action:
                             for nl in word.replace(';', '\n').split('\n'): 
@@ -258,12 +261,12 @@ def main():
                                             prefix = w[:len(w) - len(nw)]
                                             w = nw
                                         if re.match('^do\w+?\(\)$', w):
-                                            actions.append(prefix + 'self.' + w.replace('()', '(arg)').strip())
+                                            actions.append(prefix + 'self.' + w.replace('()', '(*args, **kwargs)').strip())
                                         elif re.match('^do\w+?\(.*?MSG_\d+.*?\)$', w):
                                             def _repl(mo):
                                                 d[page]['messages'].append(mo.group(1))
                                                 d[page]['msgfunc'] = True
-                                                return "self.msg('%s', arg)" % mo.group(1)
+                                                return "self.msg('%s', *args, **kwargs)" % mo.group(1)
                                             w = re.sub('(MSG_\d+)', _repl, w.strip())
                                             actions.append(prefix + 'self.' + w)
                                         elif re.match('^do\w+?\(.+?\)$', w):
@@ -275,10 +278,10 @@ def main():
                                         elif w.strip() == 'pass':
                                             actions.append('pass')
                                         else:
-                                            print '            ?', prefix, w
+                                            print('            ? %s %s' % (prefix, w))
                     else:
-                        print 'skipped:', link['from'], link['to'], color, style, word
-                        
+                        print('skipped: %s %s %s %s %s' %( link['from'], link['to'], color, style, word))
+
                 if link['to'] != state:
                     if 'post' in modes:
                         if 'fast' in modes:
@@ -287,33 +290,33 @@ def main():
                             actions.append("self.state = '%s'" % link['to'])
                     else:
                         actions.insert(0, "self.state = '%s'" % link['to']) 
-                    
+
                 condition = condition.strip()
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' is \'([\w\s\!\?\.\-]+?)\'', condition)
                     if r:
-                        condition = re.sub('event == \'\w+?\.state\' is \'[\w\s\!\?\.\-]+?\'', '( event == \'%s.state\' and arg == \'%s\' )' % (r.group(1), r.group(2)), condition, 1)
+                        condition = re.sub('event == \'\w+?\.state\' is \'[\w\s\!\?\.\-]+?\'', '( event == \'%s.state\' and args[0] == \'%s\' )' % (r.group(1), r.group(2)), condition, 1)
                         # print 1, condition 
                     else:
                         break
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' == \'([\w\s\!\?\.\-]+?)\'', condition)
                     if r:
-                        condition = re.sub('event == \'\w+?\.state\' == \'[\w\s\!\?\.\-]+?\'', '( event == \'%s.state\' and arg == \'%s\' )' % (r.group(1), r.group(2)), condition, 1)
+                        condition = re.sub('event == \'\w+?\.state\' == \'[\w\s\!\?\.\-]+?\'', '( event == \'%s.state\' and args[0] == \'%s\' )' % (r.group(1), r.group(2)), condition, 1)
                         # print 1, condition 
                     else:
                         break
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' in \[([\'\,\w\s\!\?\.\-]+?)\]', condition)
                     if r:
-                        condition = re.sub('event == \'\w+?\.state\' in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and arg in [ %s ] )' % (r.group(1), r.group(2)), condition, 1)
+                        condition = re.sub('event == \'\w+?\.state\' in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and args[0] in [ %s ] )' % (r.group(1), r.group(2)), condition, 1)
                         # print 2, condition 
                     else:
                         break
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' not in \[([\'\,\w\s\!\?\.\-]+?)\]', condition)
                     if r:
-                        condition = re.sub('event == \'\w+?\.state\' not in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and arg not in [ %s ] )' % (r.group(1), r.group(2)), condition, 1)
+                        condition = re.sub('event == \'\w+?\.state\' not in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and args[0] not in [ %s ] )' % (r.group(1), r.group(2)), condition, 1)
                         # print 3, condition 
                     else:
                         break
@@ -325,7 +328,7 @@ def main():
                     src += "            if %s:\n" % condition
                 else:
                     src += "            elif %s:\n" % condition
-                
+
                 d[page]['links'][link_id]['condition'] = condition
 
                 has_actions = has_actions or len(actions) > 0
@@ -385,7 +388,7 @@ def main():
                             d[page]['links'][link_id]['actions'].append(action)
                     elif action.count('(') == 2 and action.count(')') == 2 and action.count('self.msg') == 1:
                         funct = action[0:action.find('(')]
-                        action1 = funct + '(arg)'
+                        action1 = funct + '(*args, **kwargs)'
                         src += "                "
                         src += action
                         src += '\n'
@@ -398,12 +401,12 @@ def main():
                                 d[page]['actions'].add(action1)
                         d[page]['links'][link_id]['actions'].append(action)
                     else:
-                        print '            ?', action
+                        print('            ? %s' % action)
                 link_index += 1
-            
+
                 if not has_actions:
                     src += '                pass\n'
-            
+
             if not has_conditions:
                 src += '            pass\n'
 
@@ -414,21 +417,30 @@ def main():
         #---switch end
         src_switch = src
         src = ''
-        
+
         #---conditions
+        func_names = set()
         for condition in d[page]['conditions']:
-            name = condition.replace('self.', '').replace('(arg)', '(self, arg)')
-            src += '    def %s:\n' % name
-            src += '        """\n'
-            src += '        Condition method.\n'
-            src += '        """\n\n'
-            
+            if condition.count('(*args, **kwargs)'):
+                func_name = condition.replace('self.', '').replace('(*args, **kwargs)', '')
+                name = condition.replace('self.', '').replace('(*args, **kwargs)', '(self, *args, **kwargs)')
+            else:
+                func_name, _, func_args = condition.replace('self.', '').partition('(')
+                func_args = func_args.replace('*args, **kwargs)', '')
+                name = '%s(self, *args, **kwargs)' % func_name
+            if func_name not in func_names:
+                src += '    def %s:\n' % name
+                src += '        """\n'
+                src += '        Condition method.\n'
+                src += '        """\n\n'
+                func_names.add(func_name)
+
         src_conditions = src
         src = ''
-        
+
         #---actions
         for action in d[page]['actions']:
-            name = action.replace('self.', '').replace('(arg)', '(self, arg)')
+            name = action.replace('self.', '').replace('(*args, **kwargs)', '(self, *args, **kwargs)')
             src += '    def %s:\n' % name
             if name.count('doDestroyMe'):
                 src += '        """\n'
@@ -439,34 +451,16 @@ def main():
                 src += '        """\n'
                 src += '        Action method.\n'
                 src += '        """\n\n'
-                
+
         src_actions = src
         src = ''
-            
+
         #---header
         head = ''
         head += '''#!/usr/bin/env python
 # {}.py
 #
-# Copyright (C) 2008-2016 Veselin Penev, http://bitdust.io
-#
-# This file ({}.py) is part of BitDust Software.
-#
-# BitDust is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# BitDust Software is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with BitDust Software.  If not, see <http://www.gnu.org/licenses/>.
-#
-# Please contact us if you have any questions at bitdust.io@gmail.com'''.format(
-            automatname.replace('(', '').replace(')', ''), automatname.replace('(', '').replace(')', ''))
+'''.format(automatname.replace('(', '').replace(')', ''))
         head += '\n\n"""\n'
         head += '.. module:: %s\n' % automatname.replace('(', '').replace(')', '')
         head += '.. role:: red\n\n'
@@ -485,12 +479,12 @@ def main():
             head += 'ERRORS:\n'
             for error in d[page]['errors']:
                 head += '    * %s\n' % error
-                print '    ERROR:', error
+                print('    ERROR: %s' % error)
         head += '"""\n\n\n'
         head += 'from automats import automat\n\n\n'
         if True:
             head += '_%s = None\n\n\n' % classname
-            head += 'def A(event=None, arg=None):\n'
+            head += 'def A(event=None, *args, **kwargs):\n'
             head += '    """\n'
             head += '    Access method to interact with `%s()` machine.\n' % automatname
             head += '    """\n'
@@ -504,7 +498,7 @@ def main():
                                                             automatname.replace('(', '').replace(')', ''), 
                                                             begin_state)
             head += '    if event is not None:\n'
-            head += '        _%s.automat(event, arg)\n' % classname
+            head += '        _%s.automat(event, *args, **kwargs)\n' % classname
             head += '    return _%s\n\n\n' % classname
             head += 'def Destroy():\n'
             head += '    """\n'
@@ -545,7 +539,7 @@ def main():
                 except:
                     delay = 0
                 if delay == 0:
-                    print '    WARNING: can not understand timer event:', timer
+                    print('    WARNING: can not understand timer event: %s' % timer)
                     continue
                 head += "        '%s': (%s, [%s]),\n" % (timer, str(delay), ', '.join(map(lambda x: "'%s'" % x, states)))
             head += '        }\n\n'
@@ -554,7 +548,7 @@ def main():
             for msg in sorted(set(d[page]['messages'])):
                 head += "        '%s': '',\n" % msg 
             head += '        }\n\n'
-            head += '    def msg(self, msgid, arg=None):\n'
+            head += '    def msg(self, msgid, *args, **kwargs):\n'
             head += "        return self.MESSAGES.get(msgid, '')\n\n"
         head += '    def __init__(self, debug_level=0, log_events=False, log_transitions=False, publish_events=False, **kwargs):\n'
         head += '        """\n'
@@ -574,16 +568,16 @@ def main():
         head += '        Method to initialize additional variables and flags\n' 
         head += '        at creation phase of `%s()` machine.\n' % automatname
         head += '        """\n\n'
-        head += '    def state_changed(self, oldstate, newstate, event, arg):\n'
+        head += '    def state_changed(self, oldstate, newstate, event, *args, **kwargs):\n'
         head += '        """\n'
         head += '        Method to catch the moment when `%s()` state were changed.\n' % automatname
         head += '        """\n\n'
-        head += '    def state_not_changed(self, curstate, event, arg):\n'
+        head += '    def state_not_changed(self, curstate, event, *args, **kwargs):\n'
         head += '        """\n'
         head += '        This method intended to catch the moment when some event was fired in the `%s()`\n' % automatname
         head += '        but automat state was not changed.\n'
         head += '        """\n\n'
-        head += '    def A(self, event, arg):\n'
+        head += '    def A(self, event, *args, **kwargs):\n'
         head += '        """\n'
         head += '        The state machine code, generated using `visio2python <http://bitdust.io/visio2python/>`_ tool.\n'
         head += '        """\n'
@@ -610,9 +604,7 @@ def main():
 
     open(sys.argv[2], 'w').write(pprint.pformat(d))
 
-    print len(d), 'items wrote to', sys.argv[2]
-    
-    # raw_input("\nPress ENTER to close the window")
+    print('DONE! %d items wrote to %s' % (len(d), sys.argv[2]))
           
    
 if __name__ == '__main__':

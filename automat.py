@@ -11,8 +11,9 @@
 .. module:: automat
 
 This is the base class for State Machine.
-The BitDust project is developing in principles of 
-`Automata-based programming <http://en.wikipedia.org/wiki/Automata-based_programming>`_.
+
+You can read more about `Automata-based programming <http://en.wikipedia.org/wiki/Automata-based_programming>`_
+principles and learn how to develop your project in such way.
 
 This is a programming paradigm in which the program or its part is thought of as a model of a 
 `finite state machine <http://en.wikipedia.org/wiki/Finite_state_machine>`_ or any other formal automaton.   
@@ -26,15 +27,8 @@ The transition graphs of state machines are used in all stages of software devel
 - debugging and 
 - documentation.
 
-You can see Transition graph for all BitDust state machines in the file  
-`automats.pdf <http://bitdust.io/automats.pdf>`_, 
-MS Visio, 'editable' version:
-`automats.vsd <http://bitdust.io/automats.vsd>`_, 
-stencils is here: `automats.vss <http://bitdust.io/automats.vss>`_
-
-A small tool called `visio2python <http://code.google.com/p/visio2python/>`_ 
-was written to simplify working with the BitDust project. 
-
+A small tool called `visio2python <https://github.com/vesellov/visio2python/>`_ 
+was written by Veselin Penev to simplify working with the visualized state machines. 
 It can translate transition graphs created in Microsoft Visio into Python code.
 
 Automata-Based Programming technology was introduced by Anatoly Shalyto in 1991 and Switch-technology was 
@@ -49,31 +43,31 @@ of Information Technologies, Mechanics and Optics, Programming Technologies Depa
 `Page <http://is.ifmo.ru/english>`_.     
 """
 
+#------------------------------------------------------------------------------
+
+import logging
 import sys
 import time
 import traceback
 
-from twisted.internet import reactor
-from twisted.internet.task import LoopingCall
-from twisted.internet.defer import Deferred, fail
-
 #------------------------------------------------------------------------------ 
 
-_Debug = True
-_LogEvents = False
+logger = logging.getLogger(__name__)
 
-# _Debug = False
-# _LogEvents = True
+#------------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------ 
+_Debug = True       # set to False to turn off any logging
+_LogEvents = True   # set to True to log every event passed to any state machine
 
-_Counter = 0 #: Increment by one for every new object, the idea is to keep unique ID's in the index
-_Index = {} #: Index dictionary, unique id (string) to index (int)
+#------------------------------------------------------------------------------
+
+_Counter = 0  #: Increment by one for every new object, the idea is to keep unique ID's in the index
+_Index = {}   #: Index dictionary, unique id (string) to index (int)
 _Objects = {} #: Objects dictionary to store all state machines objects
-_StateChangedCallback = None #: Called when some state were changed
-_LogFile = None #: This is to have a separated Log file for state machines logs
+_StateChangedCallback = None  #: Called when some state were changed
+_LogFile = None  #: This is to have a separated Log file for state machines logs
 _LogFilename = None
-_LogsCount = 0 #: If not zero - it will print time since that value, not system time 
+_LogsCount = 0  #: If not zero - it will print time since that value, not system time 
 _LifeBeginsTime = 0
 
 #------------------------------------------------------------------------------ 
@@ -93,13 +87,14 @@ def create_index(name):
     """
     global _Index
     automatid = name
-    if _Index.has_key(id):
+    if id in _Index:
         i = 1
-        while _Index.has_key(automatid + '(' + str(i) + ')'):
+        while _Index.get(automatid + '(' + str(i) + ')'):
             i += 1
         automatid = name + '(' + str(i) + ')'
     _Index[automatid] = get_new_index()
     return automatid, _Index[automatid]
+
 
 def set_object(index, obj):
     """
@@ -107,7 +102,8 @@ def set_object(index, obj):
     """
     global _Objects
     _Objects[index] = obj
-   
+
+
 def clear_object(index):
     """
     Clear object with given index from memory
@@ -115,8 +111,9 @@ def clear_object(index):
     global _Objects
     if _Objects is None:
         return
-    if _Objects.has_key(index):
+    if index in _Objects:
         del _Objects[index]
+
 
 def objects():
     """
@@ -125,30 +122,14 @@ def objects():
     global _Objects
     return _Objects
 
-def communicate(index, event, arg=None):
-    """
-    You can pass an event to any state machine - select by its ``index``.
-    Use ``arg`` to pass extra data the conditions and actions methods.
-    This method creates a Deferred object, pass it as a parameter with ``event`` 
-    into the state machine and return that defer to outside - to catch result.
-    In the action method you must call ``callback`` or ``errback`` to pass result. 
-    """
-    A = objects().get(index, None)
-    if not A:
-        return fail('Sate with index %d machine not exist' % index)
-    d = Deferred()
-    args = (d, arg)
-    A.automat(event, args) 
-    return d
-
 #------------------------------------------------------------------------------ 
 
 def SetStateChangedCallback(cb):
     """
-    Set callback to be fired when any state machine changes its state 
+    Set callback to be fired when any state machine globally changes its state 
     Callback parameters are::
     
-        cb(index, id, name, new state)
+        cb(index, id, name, old_state, new_state)
     """
     global _StateChangedCallback
     _StateChangedCallback = cb
@@ -205,36 +186,14 @@ class Automat(object):
     it is placed into ``objects()`` dictionary.
     To remove the instance call ``destroy()`` method.  
     """
-    
+
     state = 'NOT_EXIST'
     """
     This is a string representing current Machine state, must be set in the constructor.
     ``NOT_EXIST`` indicates that this machine is not created yet.
     A blank state is a fundamental mistake! 
     """
-    
-    timers = {}
-    """
-    A dictionary of timer events fired at specified intervals when machine rich given state:
-          timers = {'timer-60sec':     (60,     ['STATE_A',]),
-                    'timer-3min':      (60*3,   ['STATE_B', 'STATE_C',]), }
-    """
-    
-    instant_timers = False
-    """
-    Set this to True and timers will not skip first iteration.
-    See method self.startTimers().
-    """
-     
-    fast = False
-    """
-    By default, a state machine is called like this::
-    
-          reactor.callLater(0, self.event, 'event-01', arg1, arg2, ... )
-          
-    If ``fast = True`` it will call state machine method directly. 
-    """
-    
+
     post = False
     """
     Sometimes need to set the new state AFTER finish all actions.
@@ -244,17 +203,16 @@ class Automat(object):
     put ``[post]`` string into the last line of the LABEL shape.
     """
           
-    def __init__(self, name, state, debug_level=18, log_events=False):
+    def __init__(self, name, state, debug_level=18, log_events=False, log_transitions=False, **kwargs):
         self.id, self.index = create_index(name)
         self.name = name
         self.state = state
         self.debug_level = debug_level
         self.log_events = log_events
-        self._timers = {}
-        self.init()
-        self.startTimers()
-        self.log(self.debug_level,  'CREATED AUTOMAT %s with index %d' % (str(self), self.index))
+        self.log_transitions = log_transitions
+        self.init(**kwargs)
         set_object(self.index, self)
+        self.log(self.debug_level,  'CREATED AUTOMAT %s with index %d' % (str(self), self.index))
 
     def __del__(self):
         global _Index
@@ -262,6 +220,7 @@ class Automat(object):
         if self is None:
             return
         o = self
+        last_state = self.state
         automatid = self.id
         name = self.name
         debug_level = self.debug_level
@@ -276,45 +235,47 @@ class Automat(object):
         self.log(debug_level, 'DESTROYED AUTOMAT %s with index %d' % (str(o), index))
         del o
         if _StateChangedCallback is not None:
-            _StateChangedCallback(index, automatid, name, '')
+            _StateChangedCallback(index, automatid, name, last_state, 'NOT_EXIST')
 
-    def __repr__(self):
+    def __str__(self):
         """
         Will print something like: "network_connector(CONNECTED)"
         """
         return '%s(%s)' % (self.id, self.state)
 
-    def init(self):
+    def init(self, **kwargs):
         """
         Define this method in subclass to execute some code when creating an object.
         """
+
+    def shutdown(self, **kwargs):
+        """
+        Define this method in subclass to execute some code when destroying an object.
+        """
         
-    def destroy(self):
+    def destroy(self, **kwargs):
         """
         Call this method to remove the state machine from the ``objects()`` dictionary
         and delete that instance. Be sure to not have any existing references on 
         that instance so destructor will be called immediately.
         """
-        self.log(self.debug_level, 'destroying %r, refs=%d' % (self, sys.getrefcount(self)))
-        self.stopTimers()
-        # self.state = 'NOT_EXIST'
+        self.log(self.debug_level, 'destroying %r, refs=%d' % (self, sys.getrefcount(self)), )
+        self.shutdown(**kwargs)
         objects().pop(self.index)
-        # print sys.getrefcount(self)
-                    
 
-    def state_changed(self, oldstate, newstate, event, arg):
+    def state_changed(self, oldstate, newstate, event, *args, **kwargs):
         """
         Redefine this method in subclass to be able to catch the moment 
         immediately after automat's state were changed.
         """        
 
-    def state_not_changed(self, curstate, event, arg):
+    def state_not_changed(self, curstate, event, *args, **kwargs):
         """
         Redefine this method in subclass if you want to do some actions
         immediately after processing the event, which did not change the automat's state.
         """        
 
-    def A(self, event, arg):
+    def A(self, event, *args, **kwargs):
         """
         Must define this method in subclass. 
         This is the core method of the SWITCH-technology.
@@ -322,39 +283,16 @@ class Automat(object):
         """
         raise NotImplementedError
 
-    def communicate(self, event, arg=None):
+    def automat(self, event, *args, **kwargs):
         """
-        Use ``arg`` to pass extra data the conditions and actions methods.
-        This method creates a Deferred object, pass it as a parameter with ``event`` 
-        into the state machine and return that defer to outside - to catch result.
-        In the action method you must call ``callback`` or ``errback`` to pass result. 
+        Just an alias for `event()` method.
         """
-        d = Deferred()
-        args = arg
-        if not args:
-            args = ()
-        args = tuple(list(args)+[d,])
-        self.automat(event, args) 
-        return d
+        return self.event(event, *args, **kwargs)
 
-    def automat(self, event, arg=None):
+    def event(self, event, *args, **kwargs):
         """
-        Call it like this::
-        
-            machineA.automat('init', arguments)
-            
-        to send some ``event`` to the State Machine Object.
-        You can attach parameters to that event with ``arguments`` tuple. 
-        If ``self.fast=False`` - the ``self.A()`` method will be executed in delayed call.
-        """ 
-        if self.fast:
-            self.event(event, arg)
-        else:
-            reactor.callLater(0, self.event, event, arg) #@UndefinedVariable 
-
-    def event(self, event, arg=None):
-        """
-        You can call event directly to execute ``self.A()`` immediately. 
+        Use that method to send ``event`` directly to the state machine.
+        It will execute ``self.A()`` immediately. 
         """
         global _StateChangedCallback
         if _LogEvents:
@@ -366,69 +304,26 @@ class Automat(object):
         old_state = self.state
         if self.post:
             try:
-                new_state = self.A(event, arg)
+                new_state = self.A(event, *args, **kwargs)
             except:
                 self.log(self.debug_level, traceback.format_exc())
                 return
             self.state = new_state
         else:
             try:
-                self.A(event, arg)
+                self.A(event, *args, **kwargs)
             except:
                 self.log(self.debug_level, traceback.format_exc())
                 return
             new_state = self.state
         if old_state != new_state:
-            self.log(self.debug_level, '%s(%s): (%s)->(%s)' % (self.id, event, old_state, new_state))
-            self.stopTimers()
-            self.state_changed(old_state, new_state, event, arg)
-            self.startTimers()
+            if self.log_transitions:
+                self.log(self.debug_level, '%s(%s): (%s)->(%s)' % (self.id, event, old_state, new_state))
+            self.state_changed(old_state, new_state, event, *args, **kwargs)
             if _StateChangedCallback is not None:
-                _StateChangedCallback(self.index, self.id, self.name, new_state)
+                _StateChangedCallback(self.index, self.id, self.name, old_state, new_state)
         else:
-            self.state_not_changed(self.state, event, arg)
-
-    def timer_event(self, name, interval):
-        """
-        This method fires the timer events.
-        """
-        if self.timers.has_key(name) and self.state in self.timers[name][1]:
-            self.automat(name)
-        else:
-            self.log(self.debug_level, '%s.timer_event ERROR timer %s not found in self.timers' % (str(self), name))
-
-    def stopTimers(self):
-        """
-        Stop all state machine timers.
-        """
-        for name, timer in self._timers.items(): #@UnusedVariable 
-            if timer.running:
-                timer.stop()
-        self._timers.clear()
-
-    def startTimers(self):
-        """
-        Start all state machine timers.
-        """
-        for name, (interval, states) in self.timers.items():
-            if len(states) > 0 and self.state not in states:
-                continue
-            self._timers[name] = LoopingCall(self.timer_event, name, interval)
-            self._timers[name].start(interval, self.instant_timers)
-            # self.log(self.debug_level * 4, '%s.startTimers timer %s started' % (self, name))
-
-    def restartTimers(self):
-        """
-        Restart all state machine timers.
-        When state is changed - all internal timers is restarted.
-        You can use external timers if you do not need that, call::
-        
-            machineA.automat('timer-1sec')
-            
-        to fire timer event from outside. 
-        """
-        self.stopTimers()
-        self.startTimers()
+            self.state_not_changed(self.state, event, *args, **kwargs)
 
     def log(self, level, text):
         """
@@ -460,9 +355,4 @@ class Automat(object):
             _LogFile.flush()
             _LogsCount += 1
         else:
-            try:
-                from logs import lg
-                lg.out(level, text)
-            except:
-                pass
-
+            logger.debug((' ' * level) + text)
