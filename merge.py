@@ -58,7 +58,7 @@ def processLink(name, condition, state_from, state_to):
                 break
             elif link_info['to'] == state_from and link_info['from'] == state_to:
                 # found_link_id = link_id
-                print '    WARNING    it seems connection is turned contrary in Visio Document: [%s]<->[%s]' % (state_from, state_to)
+                print('    WARNING    it seems connection is turned contrary in Visio Document: [%s]<->[%s]' % (state_from, state_to))
                 break 
 #    print '        <' + found_link_id + '> ' + condition
     return found_link_id
@@ -120,7 +120,7 @@ def mergeStateMachine(old, new, name):
         # elif line.count('fast') and line.count('=') and (line.count('True') or line.count('False')) and found_class:
         #     found_flag_fast = 'True' if line.count('True') else 'False'
 
-        elif line.count('def A(self, event, arg):') and found_class:
+        elif (line.count('def A(self, event, arg):') or line.count('def A(self, event, *args, **kwargs):')) and found_class:
             found_def_A = True
             paragraph_def_A = paragraph
             start_line = line_index
@@ -352,7 +352,7 @@ def mergeMethods(old, new, name):
                 found_class = found_class.group(1)
                 paragraph_class = paragraph
 
-        elif line.count('def A(self, event, arg):') and found_class:
+        elif (line.count('def A(self, event, arg):') or line.count('def A(self, event, *args, **kwargs):')) and found_class:
             found_def_A = True
             paragraph_def_A = paragraph
             start_line = line_index
@@ -411,18 +411,19 @@ def mergeMethods(old, new, name):
         params = map(string.strip, params.split(','))
         ok = False
         if len(params) == 0:
-            params = ['self', 'arg']
+            params = ['self', '*args', '**kwargs']
             ok = True
         elif len(params) == 1:
             if params[0] == 'self':
-                params.append('arg')
+                params.append('*args')
+                params.append('**kwargs')
                 ok = True
         else:
             if params[0] == 'self':
                 ok = True
         if not ok:
-            print '        WARNING    non canonical function name in line %d: %s' % (line_index, method)
-            params = ['self', 'arg']
+            print('        WARNING    non canonical function name in line %d: %s' % (line_index, method))
+            params = ['self', '*args', '**kwargs']
             
         method_name = method[:method.find('(')]
         # print method_name
@@ -443,7 +444,7 @@ def mergeMethods(old, new, name):
                     # print '    ' + action
                     break
         if not found:
-            print '    WARNING    method %s in line %s is unused' % (method_name, line_index)
+            print('    WARNING    method %s in line %s is unused' % (method_name, line_index))
             merged += ln + '\n'
             continue
         
@@ -459,21 +460,26 @@ def mergeMethods(old, new, name):
     src = '\n'.join(merged_lines[:non_automat_method_line_index])
     src += '\n'
 
+    condition_names = set()
     for condition in known_conditions:
-        print '    made empty method %s' % condition
-        method = condition.replace('self.', 'def ').replace('(', '(self, ')+':'
+        func_name, _, func_args = condition.replace('self.', '').partition('(')
+        if func_name in condition_names:
+            continue
+        condition_names.add(func_name)
+        method = 'def %s(self, *args, **kwargs):' % func_name
         src += ' ' * paragraph_def_A + method + '\n'
         src += ' ' * (paragraph_def_A + 4) + '"""\n'
         src += ' ' * (paragraph_def_A + 4) + 'Condition method.\n'
         src += ' ' * (paragraph_def_A + 4) + '"""\n\n'
+        print('    made empty method %s' % method)
 
     for action in known_actions:
-        print '    made empty method %s' % action
         method = action.replace('self.', 'def ').replace('(', '(self, ')+':'
         src += ' ' * paragraph_def_A + method + '\n'
         src += ' ' * (paragraph_def_A + 4) + '"""\n'
         src += ' ' * (paragraph_def_A + 4) + 'Action method.\n'
         src += ' ' * (paragraph_def_A + 4) + '"""\n\n'
+        print('    made empty method %s' % action)
     
     # src += '\n'
     src += '\n'.join(merged_lines[non_automat_method_line_index:])
@@ -680,11 +686,11 @@ def main():
         if not os.path.isfile(filepath_new):
             continue
         if not os.access(filepath_new, os.R_OK):
-            print 'can not read file %s, do not have read permissions' % filepath_new
+            print('can not read file %s, do not have read permissions' % filepath_new)
             continue
         filepath_old = os.path.abspath(os.path.join(path_old, filename))
         if os.path.isfile(filepath_old) and not os.access(filepath_old, os.W_OK):
-            print 'do not have write permissions for file %s' % filepath_old
+            print('do not have write permissions for file %s' % filepath_old)
             continue
         automat_name = filename.replace('.py', '') + '()'
         filepath = os.path.join(path_old, filename)
@@ -695,9 +701,8 @@ def main():
         if filename not in files_old:
             if not only_update:
                 open(filepath_old, 'w').write(src_new)
-                print fp, '    new file created'.upper(), len(src_new), 'bytes long'
+                print('%s    new file created %d bytes long' % (fp, len(src_new), ))
                 continue
-            # print fp, '    skip'.upper()
             continue
         
         fin = open(filepath_old)
@@ -705,40 +710,40 @@ def main():
         fin.close()  
         src_merged = src_old        
         
-        print 'process', fp
+        print('process %s' % fp)
         
         src_merged, errors = mergeStateMachine(src_merged, src_new, automat_name)
         if errors:
-            print fp, ' : mergeStateMachine()\n' + ( '\n    '.join(errors) )
+            print('%s : mergeStateMachine()\n%s' % (fp, ( '\n    '.join(errors))))
             continue
         
         src_merged, errors = mergeMethods(src_merged, src_new, automat_name)
         if errors:
-            print fp, ' : mergeMethods()\n    ' + ( '\n    '.join(errors) )
+            print('%s : mergeMethods()\n%s' % (fp,( '\n    '.join(errors))))
             continue
         
         src_merged, errors = mergeTimers(src_merged, src_new, automat_name)
         if errors:
-            print fp, ' : mergeTimers()\n    ' + ( '\n    '.join(errors) )
+            print('%s : mergeTimers()\n%s' % (fp, ( '\n    '.join(errors))))
             continue
 
         src_merged, errors = mergeHeading(src_merged, src_new, automat_name)
         if errors:
-            print fp, ' : mergeHeading()\n    ' + ( '\n    '.join(errors) )
+            print('%s : mergeHeading()\n%s' % (fp, ( '\n    '.join(errors))))
             continue
 
         src_merged, errors = mergeEvents(src_merged, src_new, automat_name)
         if errors:
-            print fp, ' : mergeEvents()\n    ' + ( '\n    '.join(errors) )
+            print('%s : mergeEvents()\n%s' % (fp, ( '\n    '.join(errors))))
             continue
         
         md5_old = hashlib.md5(src_old).hexdigest()
         md5_merged = hashlib.md5(src_merged).hexdigest()
         if md5_old != md5_merged:
             if dont_modify:
-                print '    changed'.upper()
+                print('    changed'.upper())
             else:
-                print '    updated'.upper()
+                print('    updated'.upper())
 
         if dont_modify:
             import difflib
@@ -761,7 +766,7 @@ def main():
             try:
                 os.remove(filepath_new)
             except:
-                print '    can not delete the file', filepath_new
+                print('    can not delete the file %s' % filepath_new)
                 
         # if md5_old == md5_merged:
             # print fp, '    not changed'.upper()
@@ -775,5 +780,3 @@ def main():
    
 if __name__ == '__main__':
     main()   
-
-
