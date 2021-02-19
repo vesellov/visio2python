@@ -322,8 +322,8 @@ def mergeMethods(old, new, name):
     found_def_A = False
     paragraph_class = -1
     paragraph_def_A = -1
-    known_conditions = D[name]['conditions']
-    known_actions = D[name]['actions']
+    known_conditions = list(D[name]['conditions'])
+    known_actions = list(D[name]['actions'])
     automat_method_line_index = -1
     non_automat_method_line_index = -1
     class_finished_line_index = -1
@@ -408,7 +408,7 @@ def mergeMethods(old, new, name):
         automat_method_line_index = line_index - 1
         
         params = method[method.find('(')+1 : method.rfind(')')]
-        params = map(string.strip, params.split(','))
+        params = list(map(lambda p: p.strip(), params.split(',')))
         ok = False
         if len(params) == 0:
             params = ['self', '*args', '**kwargs']
@@ -429,20 +429,24 @@ def mergeMethods(old, new, name):
         # print method_name
         
         found = False
+        # print('method_name: %r' % method_name)
+        # print('known_conditions before1: %r' % known_conditions)
         if method_name.startswith('is'):
             for condition in D[name]['conditions']:
                 if condition.startswith('self.'+method_name+'('):
                     found = True
                     known_conditions.remove(condition)
                     # print '    ' + condition
-                    break
+                    # break
         else:
             for action in D[name]['actions']:
                 if action.startswith('self.'+method_name+'('):
                     found = True
                     known_actions.remove(action)
                     # print '    ' + action
-                    break
+                    # break
+        # print('known_conditions before2: %r' % known_conditions)
+
         if not found:
             print('    WARNING    method %s in line %s is unused' % (method_name, line_index))
             merged += ln + '\n'
@@ -461,6 +465,7 @@ def mergeMethods(old, new, name):
     src += '\n'
 
     condition_names = set()
+    # print('known_conditions after: %r' % known_conditions)
     for condition in known_conditions:
         func_name, _, func_args = condition.replace('self.', '').partition('(')
         if func_name in condition_names:
@@ -737,13 +742,13 @@ def main():
             print('%s : mergeEvents()\n%s' % (fp, ( '\n    '.join(errors))))
             continue
         
-        md5_old = hashlib.md5(src_old).hexdigest()
-        md5_merged = hashlib.md5(src_merged).hexdigest()
+        md5_old = hashlib.md5(src_old.encode('utf-8')).hexdigest()
+        md5_merged = hashlib.md5(src_merged.encode('utf-8')).hexdigest()
         if md5_old != md5_merged:
             if dont_modify:
                 print('    changed'.upper())
-            else:
-                print('    updated'.upper())
+        else:
+            print('    no changes detected')
 
         if dont_modify:
             import difflib
@@ -757,11 +762,12 @@ def main():
             # fout = open(filepath_old+'.new', 'w')
             if md5_old != md5_merged:
                 fout = open(filepath_old, 'w')
-                fout.write(src_merged)
+                fout.write(src_merged.replace('\r\n', '\n'))
                 fout.close()
-        
+                print('    updated'.upper())
+
         # os.system('diff %s %s' % (filepath_old, filepath_old+'.new'))
-        
+
         if remove_new:
             try:
                 os.remove(filepath_new)
@@ -773,7 +779,8 @@ def main():
             
         # if automat_name.count('fire_hire'):
         #     break
-        
+    
+    print('DONE')
     # raw_input("\nPress ENTER to close the window")
 
 

@@ -1,6 +1,6 @@
 VERSION 5.00
 Begin VB.Form Form1 
-   BackColor       =   &H80000001&
+   BackColor       =   &H8000000D&
    BorderStyle     =   1  'Fixed Single
    Caption         =   "visio2python"
    ClientHeight    =   8505
@@ -42,7 +42,8 @@ Begin VB.Form Form1
    End
    Begin VB.Frame Frame4 
       Appearance      =   0  'Flat
-      BackColor       =   &H80000001&
+      BackColor       =   &H8000000D&
+      BorderStyle     =   0  'None
       Caption         =   "Step 3"
       BeginProperty Font 
          Name            =   "Arial"
@@ -82,7 +83,7 @@ Begin VB.Form Form1
       End
       Begin VB.CheckBox Check3 
          Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
+         BackColor       =   &H8000000D&
          Caption         =   "don't modify any files, jsut show difference"
          ForeColor       =   &H8000000E&
          Height          =   255
@@ -93,7 +94,7 @@ Begin VB.Form Form1
       End
       Begin VB.CheckBox Check2 
          Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
+         BackColor       =   &H8000000D&
          Caption         =   "remove generated files after merge with existing code"
          ForeColor       =   &H8000000E&
          Height          =   255
@@ -104,7 +105,7 @@ Begin VB.Form Form1
       End
       Begin VB.CheckBox Check1 
          Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
+         BackColor       =   &H8000000D&
          Caption         =   "update existing files only, don't create new files"
          ForeColor       =   &H8000000E&
          Height          =   255
@@ -136,19 +137,20 @@ Begin VB.Form Form1
       End
       Begin VB.Label Label1 
          Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
-         Caption         =   "Existing python files location:"
+         BackColor       =   &H8000000D&
+         Caption         =   "Location of existing files to be merged:"
          ForeColor       =   &H8000000E&
          Height          =   255
-         Left            =   240
+         Left            =   120
          TabIndex        =   0
          Top             =   1320
-         Width           =   4095
+         Width           =   4215
       End
    End
    Begin VB.Frame Frame3 
       Appearance      =   0  'Flat
-      BackColor       =   &H80000001&
+      BackColor       =   &H8000000D&
+      BorderStyle     =   0  'None
       Caption         =   "Step 2"
       BeginProperty Font 
          Name            =   "Arial"
@@ -264,8 +266,8 @@ Begin VB.Form Form1
       End
       Begin VB.Label Label2 
          Appearance      =   0  'Flat
-         BackColor       =   &H80000001&
-         Caption         =   "Location for generated files:"
+         BackColor       =   &H8000000D&
+         Caption         =   "Location for new files:"
          BeginProperty Font 
             Name            =   "Arial"
             Size            =   8.25
@@ -285,7 +287,8 @@ Begin VB.Form Form1
    End
    Begin VB.Frame Frame2 
       Appearance      =   0  'Flat
-      BackColor       =   &H80000001&
+      BackColor       =   &H8000000D&
+      BorderStyle     =   0  'None
       Caption         =   "Step 1"
       BeginProperty Font 
          Name            =   "Arial"
@@ -323,6 +326,27 @@ Begin VB.Form Form1
          Top             =   2040
          Width           =   4695
       End
+      Begin VB.CommandButton Command2 
+         Appearance      =   0  'Flat
+         BackColor       =   &H80000014&
+         Caption         =   "Scan opened MS Visio document"
+         BeginProperty Font 
+            Name            =   "Tahoma"
+            Size            =   12
+            Charset         =   204
+            Weight          =   700
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   735
+         Left            =   120
+         MaskColor       =   &H00FFFFFF&
+         Style           =   1  'Graphical
+         TabIndex        =   2
+         Top             =   1200
+         Width           =   4695
+      End
       Begin VB.CommandButton Command1 
          Appearance      =   0  'Flat
          BackColor       =   &H80000014&
@@ -345,27 +369,6 @@ Begin VB.Form Form1
          UseMaskColor    =   -1  'True
          Width           =   4695
       End
-      Begin VB.CommandButton Command2 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000014&
-         Caption         =   "Scan opened MS Visio document"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   12
-            Charset         =   204
-            Weight          =   700
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   735
-         Left            =   120
-         MaskColor       =   &H00FFFFFF&
-         Style           =   1  'Graphical
-         TabIndex        =   2
-         Top             =   1200
-         Width           =   4695
-      End
    End
 End
 Attribute VB_Name = "Form1"
@@ -375,27 +378,58 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Dim appVisio As Visio.Application
-Dim docVisio As Visio.Document
-Dim pagesVisio As Visio.Pages
-Dim pageVisio As Visio.Page
-Dim shapesVisio As Visio.Shapes
-Dim shapeVisio As Visio.Shape
-Dim shapeTo As Visio.Shape
-Dim shapeFrom As Visio.Shape
-Dim shapeCur As Visio.Shape
-Dim charactersVisio As Visio.Characters
-Dim cellColorVisio As Visio.Cell
-Dim cellStyleVisio As Visio.Cell
-Dim chars As Visio.Characters
-Dim celll As Visio.Cell
-Dim connects As Visio.connects
-Dim connect As Visio.connect
+Dim appVisio As Object
+Dim docVisio As Object
+Dim pagesVisio As Object
+Dim pageVisio As Object
+Dim shapesVisio As Object
+Dim shapeVisio As Object
+Dim shapeTo As Object
+Dim shapeFrom As Object
+Dim shapeCur As Object
+Dim charactersVisio As Object
+Dim cellColorVisio As Object
+Dim cellStyleVisio As Object
+Dim chars As Object
+Dim celll As Object
+Dim connects As Object
+Dim connect As Object
 
 Dim outputFilename As String
 Dim outputFile
 Dim FSO
 Dim ts
+
+
+
+Private Declare Sub Sleep Lib "kernel32" _
+    (ByVal dwMilliseconds As Long)
+
+
+Private Sub MakeVisioApplication()
+    Dim intSection As Integer
+    Dim intTries As Integer
+    On Error GoTo ErrorHandler
+    intSection = 1 'attempting GetObject...
+    Set appVisio = GetObject(, "Visio.Application")
+    intSection = 0 'resume normal error handling
+    ' MsgBox "Found existing Microsoft Visio process"
+    Exit Sub
+    
+ErrorHandler:
+    If intSection = 1 Then
+        intTries = intTries + 1
+        If intTries < 5 Then
+            Sleep 500
+            Resume
+        Else
+            Set appVisio = CreateObject("Visio.Application")
+            MsgBox "Started new Microsoft Visio process, please open your document in that window and try again."
+        End If
+    Else
+        MsgBox Error$
+    End If
+End Sub
 
 
 Private Function CharacterFormatEnd(visShape As Visio.Shape, iBegin As Integer) As Integer
@@ -584,7 +618,12 @@ Private Sub GetData(pageName As String)
                             charactersVisio.End = iEnd
                             Set cellColorVisio = shapeVisio.CellsSRC(visSectionCharacter, iRow, visCharacterColor)
                             Set cellStyleVisio = shapeVisio.CellsSRC(visSectionCharacter, iRow, visCharacterStyle)
-                            sColor = Replace(cellColorVisio.Formula, "THEMEGUARD", "")
+                            If cellColorVisio = 0 Then
+                                sColor = "(RGB(0;0;0))"
+                            Else
+                                sColor = Replace(cellColorVisio.Formula, "THEMEGUARD", "")
+                            End If
+                            sColor = Replace(sColor, ",", ";")
                             If sColor = "0" Or sColor = "" Then
                                 sColor = "(RGB(0;0;0))"
                             ElseIf sColor = "2" Then
@@ -604,6 +643,8 @@ Private Sub GetData(pageName As String)
                             sColor = Replace(sColor, "))", "]")
                             sColor = Replace(sColor, ")", "]")
                             sColor = Replace(sColor, "RGB(", "[")
+                            ' Output.AddItem ("      text [" & charactersVisio.Text & "] with color " & sColor)
+                            ' Output.ListIndex = Output.ListCount - 1
                             If sColor <> "[0;0;0]" And sColor <> "[255;0;0]" And sColor <> "[0;128;0]" And sColor <> "[0;0;255]" And sColor <> "[128;128;0]" Then
                                 outputFile.WriteLine ("        ERROR! text on link [" & shapeVisio.Name & "] have wrong color: " & sColor)
                                 Output.AddItem ("ERROR! text on link [" & shapeVisio.Name & "] have wrong color: " & sColor)
@@ -613,8 +654,8 @@ Private Sub GetData(pageName As String)
                             iBegin = iEnd
                         Next iRow
                         outputFile.WriteLine (tmpTxt)
-                        Output.AddItem ("    link " & Replace(shapeVisio.Name, " ", "_") & " [" & UCase(shapeFrom.Characters.Text) & "] -> [" & UCase(shapeTo.Characters.Text) & "]")
-                        Output.ListIndex = Output.ListCount - 1
+                        ' Output.AddItem ("    link " & Replace(shapeVisio.Name, " ", "_") & " [" & UCase(shapeFrom.Characters.Text) & "] -> [" & UCase(shapeTo.Characters.Text) & "]")
+                        ' Output.ListIndex = Output.ListCount - 1
                         arcs = arcs + 1
                         ' Output.Refresh
                 End If
@@ -687,16 +728,8 @@ Sub ScanCurrentDocument()
     Output.AddItem ("Looking for Microsoft Visio")
     Output.ListIndex = Output.ListCount - 1
     ' Output.Refresh
-    Set appVisio = GetObject(, "visio.application")
-    If appVisio Is Nothing Then
-        Set appVisio = CreateObject("visio.application")
-        If appVisio Is Nothing Then
-            Output.AddItem ("Error Opening Visio!")
-            Output.ListIndex = Output.ListCount - 1
-            ' Output.Refresh
-            GoTo EXIT_
-        End If
-    End If
+
+    MakeVisioApplication
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
@@ -733,17 +766,9 @@ Sub ScanCurrentPage()
     Output.AddItem ("Looking for Microsoft Visio")
     Output.ListIndex = Output.ListCount - 1
     ' Output.Refresh
-    Set appVisio = GetObject(, "visio.application")
-    If appVisio Is Nothing Then
-        Set appVisio = CreateObject("visio.application")
-        If appVisio Is Nothing Then
-            Output.AddItem ("Error Opening Visio!")
-            Output.ListIndex = Output.ListCount - 1
-            ' Output.Refresh
-            GoTo EXIT_
-        End If
-    End If
-      
+    
+    MakeVisioApplication
+
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
         Output.AddItem ("Please Open Microsoft Visio Document")
@@ -780,17 +805,9 @@ Sub FixCurrentDocument()
     Output.AddItem ("Looking for Microsoft Visio")
     Output.ListIndex = Output.ListCount - 1
     ' Output.Refresh
-    Set appVisio = GetObject(, "visio.application")
-    If appVisio Is Nothing Then
-        Set appVisio = CreateObject("visio.application")
-        If appVisio Is Nothing Then
-            Output.AddItem ("Error Opening Visio!")
-            Output.ListIndex = Output.ListCount - 1
-            ' Output.Refresh
-            GoTo EXIT_
-        End If
-    End If
-      
+
+    MakeVisioApplication
+
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
         Output.AddItem ("Please Open Microsoft Visio Document")
@@ -825,15 +842,8 @@ Sub BuildIndexWholeDocument()
     
     Output.AddItem ("Looking for Microsoft Visio")
     Output.ListIndex = Output.ListCount - 1
-    Set appVisio = GetObject(, "visio.application")
-    If appVisio Is Nothing Then
-        Set appVisio = CreateObject("visio.application")
-        If appVisio Is Nothing Then
-            Output.AddItem ("Error Opening Visio!")
-            Output.ListIndex = Output.ListCount - 1
-            GoTo EXIT_
-        End If
-    End If
+
+    MakeVisioApplication
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
@@ -859,18 +869,15 @@ End Sub
 
 
 Private Sub Command1_Click()
-    On Error Resume Next
-    Set appVisio = GetObject(, "visio.application")
-    If appVisio Is Nothing Then
-       Set appVisio = CreateObject("visio.application")
-    End If
+    ' On Error Resume Next
+    MakeVisioApplication
 End Sub
 
 
 
 
 Private Sub Command2_Click()
-    On Error Resume Next
+    ' On Error Resume Next
     ScanCurrentDocument
 End Sub
 
@@ -882,7 +889,9 @@ Private Sub Command3_Click()
     Dim fin As Integer
     Dim oShell As Object
     cmd = "python data2py.py ./data.txt ./structure.txt " & Text1.Text
-    Output.AddItem ("Running command " & cmd)
+    Output.AddItem ("Running command:")
+    Output.ListIndex = Output.ListCount - 1
+    Output.AddItem ("    [" & cmd & "]")
     Output.ListIndex = Output.ListCount - 1
     Set oShell = CreateObject("Wscript.Shell")
     oShell.Run "%COMSPEC% /c " & cmd & " > generate.txt", 0, True
@@ -925,7 +934,7 @@ End Sub
 
 
 Private Sub Command5_Click()
-    On Error Resume Next
+    ' On Error Resume Next
     ScanCurrentPage
 End Sub
 
@@ -945,7 +954,7 @@ Private Sub Command7_Click()
 End Sub
 
 Private Sub Command8_Click()
-    On Error Resume Next
+    ' On Error Resume Next
     BuildIndexWholeDocument
 End Sub
 
@@ -1012,7 +1021,7 @@ End Sub
 
 
 Private Sub Command9_Click()
-    On Error Resume Next
+    ' On Error Resume Next
     FixCurrentDocument
 End Sub
 
@@ -1041,21 +1050,12 @@ End Sub
     
     
 Private Sub Command1111_Click()
-    On Error Resume Next
+    ' On Error Resume Next
 
     Output.AddItem ("Looking for Microsoft Visio")
     Output.ListIndex = Output.ListCount - 1
-    
-    Set appVisio = GetObject(, "visio.application")
-    If appVisio Is Nothing Then
-        Set appVisio = CreateObject("visio.application")
-        If appVisio Is Nothing Then
-            Output.AddItem ("Error Opening Visio!")
-            Output.ListIndex = Output.ListCount - 1
-            ' Output.Refresh
-            GoTo EXIT_
-        End If
-    End If
+
+    MakeVisioApplication
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then
@@ -1072,21 +1072,12 @@ EXIT_:
 End Sub
 
 Private Sub Command11_Click()
-    On Error Resume Next
+    ' On Error Resume Next
 
     Output.AddItem ("Looking for Microsoft Visio")
     Output.ListIndex = Output.ListCount - 1
-    
-    Set appVisio = GetObject(, "visio.application")
-    If appVisio Is Nothing Then
-        Set appVisio = CreateObject("visio.application")
-        If appVisio Is Nothing Then
-            Output.AddItem ("Error Opening Visio!")
-            Output.ListIndex = Output.ListCount - 1
-            ' Output.Refresh
-            GoTo EXIT_
-        End If
-    End If
+
+    MakeVisioApplication
       
     Set docVisio = appVisio.ActiveDocument
     If docVisio Is Nothing Then

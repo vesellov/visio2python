@@ -116,7 +116,7 @@ def main():
         print('creating %s' % filepath)
         automatname, begin_state = split_name_vs_state(page)
         # automatname = page.replace('()', '')
-        classname = ''.join(map(string.capitalize, automatname.split('_')))
+        classname = ''.join(map(lambda w: w.capitalize(), automatname.split('_')))
         label = info['label'].strip()
         modes = []
         if label:
@@ -125,7 +125,7 @@ def main():
             else:
                 lbl = label.split('\\n')[0]
             automatname, begin_state = split_name_vs_state(lbl)
-            classname = ''.join(map(string.capitalize, automatname.split('_')))
+            classname = ''.join(map(lambda w: w.capitalize(), automatname.split('_')))
             # automatname = lbl
             if label.endswith(']'):
                 for mod in label.split('\\n')[-1].strip('[]').split(','):
@@ -261,8 +261,13 @@ def main():
                                             prefix = w[:len(w) - len(nw)]
                                             w = nw
                                         if re.match('^do\w+?\(\)$', w):
-                                            actions.append(prefix + 'self.' + w.replace('()', '(*args, **kwargs)').strip())
+                                            # doSomething()
+                                            # self.doSomething(*args, **kwargs)
+                                            w = w.strip().replace('()', '(*args, **kwargs)')
+                                            actions.append(prefix + 'self.' + w)
                                         elif re.match('^do\w+?\(.*?MSG_\d+.*?\)$', w):
+                                            # doShowSomeMessage(MSG_04)
+                                            # self.doShowSomeMessage(self.msg('MSG_04', *args, **kwargs), *args, **kwargs)
                                             def _repl(mo):
                                                 d[page]['messages'].append(mo.group(1))
                                                 d[page]['msgfunc'] = True
@@ -270,10 +275,16 @@ def main():
                                             w = re.sub('(MSG_\d+)', _repl, w.strip())
                                             actions.append(prefix + 'self.' + w)
                                         elif re.match('^do\w+?\(.+?\)$', w):
-                                            actions.append(prefix + 'self.' + w.strip())
+                                            # doSomething(more)
+                                            # self.doSomething(more, *args, **kwargs)
+                                            w = w.strip()[:-1] + ', *args, **kwargs)'
+                                            actions.append(prefix + 'self.' + w)
                                         elif re.match('^[\w\ ]+[\=\+\-\*\\\/\^\%\!\&]+[\w\ ]+?$', w):
+                                            # some_parameter += certain_value
+                                            # self.some_parameter += certain_value
                                             actions.append(prefix + 'self.' + w.strip())
-                                        elif re.match('^[\w\_\ ]+\.[\w\_\ ]+\(\)$', w):
+                                        elif re.match('^[\w\_\ ]+\.[\w\_\ ]+\(.+?\)$', w):
+                                            # another.method(with, parameters)
                                             actions.append(prefix + w.strip())
                                         elif w.strip() == 'pass':
                                             actions.append('pass')
@@ -440,7 +451,18 @@ def main():
 
         #---actions
         for action in d[page]['actions']:
-            name = action.replace('self.', '').replace('(*args, **kwargs)', '(self, *args, **kwargs)')
+            name = action.replace(
+                'self.', '',
+            ).replace(
+                '(*args, **kwargs)',
+                '(self, *args, **kwargs)',
+            ).replace(
+                '(event)',
+                '(self, event, *args, **kwargs)',
+            ).replace(
+                '(event, *args, **kwargs)',
+                '(self, event, *args, **kwargs)',
+            )
             src += '    def %s:\n' % name
             if name.count('doDestroyMe'):
                 src += '        """\n'
@@ -489,14 +511,15 @@ def main():
             head += '    Access method to interact with `%s()` machine.\n' % automatname
             head += '    """\n'
             head += '    global _%s\n' % classname
-            head += '    if event is None and arg is None:\n'
+            head += '    if event is None:\n'
             head += '        return _%s\n' % classname
             head += '    if _%s is None:\n' % classname
-            head += '        # set automat name and starting state here\n'
-            head += '        _%s = %s(\'%s\', \'%s\')\n' % (classname, 
+            head += '        # TODO: set automat name and starting state here\n'
+            head += '        _%s = %s(name=\'%s\', state=\'%s\')\n' % (
+                                                            classname, 
                                                             classname, 
                                                             automatname.replace('(', '').replace(')', ''), 
-                                                            begin_state)
+                                                            begin_state, )
             head += '    if event is not None:\n'
             head += '        _%s.automat(event, *args, **kwargs)\n' % classname
             head += '    return _%s\n\n\n' % classname
@@ -599,13 +622,21 @@ def main():
             src_switch += '        return newstate\n'
 
         src = head + src_switch + '\n\n' + src_conditions + src_actions + tail
-        
-        open(filepath, 'w').write(src)
+        src = src.replace('\r\n', '\n')
 
-    open(sys.argv[2], 'w').write(pprint.pformat(d))
+        try:
+            open(filepath, 'w').write(src)
+        except Exception as exc:
+            print(exc)
 
-    print('DONE! %d items wrote to %s' % (len(d), sys.argv[2]))
-          
+    try:
+        open(sys.argv[2], 'w').write(pprint.pformat(d))
+    except Exception as exc:
+        print(exc)
+
+    print('    %d items wrote to %s' % (len(d), sys.argv[2]))
+    print('DONE')
+
    
 if __name__ == '__main__':
     try:
