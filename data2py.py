@@ -307,28 +307,42 @@ def main():
                     r = re.search('event == \'(\w+?)\.state\' is \'([\w\s\!\?\.\-]+?)\'', condition)
                     if r:
                         condition = re.sub('event == \'\w+?\.state\' is \'[\w\s\!\?\.\-]+?\'', '( event == \'%s.state\' and args[0] == \'%s\' )' % (r.group(1), r.group(2)), condition, 1)
-                        # print 1, condition 
+                        # print 1, condition
                     else:
                         break
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' == \'([\w\s\!\?\.\-]+?)\'', condition)
                     if r:
                         condition = re.sub('event == \'\w+?\.state\' == \'[\w\s\!\?\.\-]+?\'', '( event == \'%s.state\' and args[0] == \'%s\' )' % (r.group(1), r.group(2)), condition, 1)
-                        # print 1, condition 
+                        # print 1, condition
+                    else:
+                        break
+                while True:
+                    r = re.search('event == \'(\w+?)\.state\' is not \'([\w\s\!\?\.\-]+?)\'', condition)
+                    if r:
+                        condition = re.sub('event == \'\w+?\.state\' is not \'[\w\s\!\?\.\-]+?\'', '( event == \'%s.state\' and args[0] != \'%s\' )' % (r.group(1), r.group(2)), condition, 1)
+                        # print 1, condition
+                    else:
+                        break
+                while True:
+                    r = re.search('event == \'(\w+?)\.state\' != \'([\w\s\!\?\.\-]+?)\'', condition)
+                    if r:
+                        condition = re.sub('event == \'\w+?\.state\' != \'[\w\s\!\?\.\-]+?\'', '( event == \'%s.state\' and args[0] != \'%s\' )' % (r.group(1), r.group(2)), condition, 1)
+                        # print 1, condition
                     else:
                         break
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' in \[([\'\,\w\s\!\?\.\-]+?)\]', condition)
                     if r:
                         condition = re.sub('event == \'\w+?\.state\' in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and args[0] in [ %s ] )' % (r.group(1), r.group(2)), condition, 1)
-                        # print 2, condition 
+                        # print 2, condition
                     else:
                         break
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' not in \[([\'\,\w\s\!\?\.\-]+?)\]', condition)
                     if r:
                         condition = re.sub('event == \'\w+?\.state\' not in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and args[0] not in [ %s ] )' % (r.group(1), r.group(2)), condition, 1)
-                        # print 3, condition 
+                        # print 3, condition
                     else:
                         break
                 condition = condition.replace('  ', ' ')
@@ -602,7 +616,7 @@ def main():
         head += '        """\n\n'
         head += '    def A(self, event, *args, **kwargs):\n'
         head += '        """\n'
-        head += '        The state machine code, generated using `visio2python <http://bitdust.io/visio2python/>`_ tool.\n'
+        head += '        The state machine code, generated using `visio2python <https://github.com/vesellov/visio2python>`_ tool.\n'
         head += '        """\n'
 
         #---tail
