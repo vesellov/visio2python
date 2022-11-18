@@ -334,14 +334,14 @@ def main():
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' in \[([\'\,\w\s\!\?\.\-]+?)\]', condition)
                     if r:
-                        condition = re.sub('event == \'\w+?\.state\' in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and args[0] in [ %s ] )' % (r.group(1), r.group(2)), condition, 1)
+                        condition = re.sub('event == \'\w+?\.state\' in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and args[0] in [%s] )' % (r.group(1), r.group(2)), condition.rstrip(','), 1)
                         # print 2, condition
                     else:
                         break
                 while True:
                     r = re.search('event == \'(\w+?)\.state\' not in \[([\'\,\w\s\!\?\.\-]+?)\]', condition)
                     if r:
-                        condition = re.sub('event == \'\w+?\.state\' not in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and args[0] not in [ %s ] )' % (r.group(1), r.group(2)), condition, 1)
+                        condition = re.sub('event == \'\w+?\.state\' not in \[[\'\,\w\s\!\?\.\-]+?\]', '( event == \'%s.state\' and args[0] not in [%s] )' % (r.group(1), r.group(2)), condition.rstrip(','), 1)
                         # print 3, condition
                     else:
                         break
